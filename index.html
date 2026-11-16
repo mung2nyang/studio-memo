@@ -3,26 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F7F6F3">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#141414">
+<meta name="color-scheme" content="dark">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <title>스튜디오 메모</title>
 <style>
   :root{
-    --bg:#f8f7f4;
-    --panel:#ffffff;
-    --line:#e7e3dd;
-    --line-soft:#f0ede8;
-    --ink:#1b1917;
-    --ink-2:#635d56;
-    --ink-3:#9a938b;
-    --bubble:#ffffff;
-    --tint:#f4f2ee;
-    --danger:#9a3b31;
-    --shadow-1:0 1px 2px rgba(27,25,23,.05);
-    --shadow-2:0 10px 34px rgba(27,25,23,.14);
+    color-scheme:dark;
+    --bg:#141414;
+    --panel:#1B1B1C;
+    --line:#2A2A2C;
+    --line-soft:#232325;
+    --ink:#F0F0F2;
+    --ink-2:#B0B0B6;
+    --ink-3:#8E8E93;
+    --bubble:#242426;
+    --bubble-line:#303033;
+    --field:#202022;
+    --placeholder:#6E6E73;
+    --day:#222224;
+    --tint:#242426;
+    --focus:#5E5E63;
+    --danger:#E0796E;
+    --danger-bg:#8E3B33;
+    --shadow-1:0 1px 2px rgba(0,0,0,.45);
+    --shadow-2:0 12px 36px rgba(0,0,0,.6);
     --font:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Malgun Gothic", "Segoe UI", system-ui, sans-serif;
   }
   *{box-sizing:border-box}
@@ -34,7 +41,7 @@
     overflow:hidden;
   }
   button{font-family:inherit}
-  :focus-visible{outline:2px solid #b9b2a7; outline-offset:2px}
+  :focus-visible{outline:2px solid var(--focus); outline-offset:2px}
 
   .app{display:flex; height:100vh; height:100dvh; overflow:hidden}
 
@@ -64,7 +71,7 @@
     flex:0 0 28px; width:28px; height:28px; margin-right:6px; border:0; background:none; border-radius:8px;
     color:var(--ink-3); cursor:pointer; display:flex; align-items:center; justify-content:center;
   }
-  .folder-more:hover{background:#ebe7e1; color:var(--ink)}
+  .folder-more:hover{background:#2C2C2E; color:var(--ink)}
   .side-foot{padding:10px 14px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid var(--line-soft)}
   .side-add{
     width:100%; display:flex; align-items:center; justify-content:center; gap:6px;
@@ -72,13 +79,13 @@
     background:var(--panel); border:1px solid var(--line); border-radius:11px; cursor:pointer;
     transition:background .15s ease, border-color .15s ease;
   }
-  .side-add:hover{background:var(--tint); border-color:#ddd7cf}
+  .side-add:hover{background:var(--tint); border-color:#3A3A3C}
 
   /* ── main ────────────────────────────────── */
   .main{flex:1; min-width:0; display:flex; flex-direction:column; background:var(--bg)}
   .topbar{
     display:flex; align-items:center; gap:8px; padding:10px 14px;
-    background:rgba(255,255,255,.9); border-bottom:1px solid var(--line);
+    background:rgba(27,27,28,.88); border-bottom:1px solid var(--line);
     -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); z-index:5;
   }
   .icon-btn{
@@ -104,17 +111,17 @@
   .search svg{position:absolute; left:11px; width:15px; height:15px; color:var(--ink-3); pointer-events:none}
   .search input{
     width:100%; height:34px; padding:0 12px 0 32px; font:inherit; font-size:13.5px; color:var(--ink);
-    background:var(--panel); border:1px solid var(--line); border-radius:10px; outline:none;
+    background:var(--field); border:1px solid var(--line); border-radius:10px; outline:none;
     transition:border-color .15s ease, box-shadow .15s ease;
   }
-  .search input::placeholder{color:#b3aca3}
-  .search input:focus{border-color:#cfc8bd; box-shadow:0 0 0 3px rgba(27,25,23,.04)}
-  .seg{display:inline-flex; gap:2px; padding:2px; background:#efebe5; border-radius:10px}
+  .search input::placeholder{color:var(--placeholder)}
+  .search input:focus{border-color:#4A4A4E; box-shadow:0 0 0 3px rgba(240,240,242,.05)}
+  .seg{display:inline-flex; gap:2px; padding:2px; background:#202022; border-radius:10px}
   .seg button{
     border:0; background:none; padding:6px 11px; font-size:12.5px; color:var(--ink-2);
     border-radius:8px; cursor:pointer; white-space:nowrap;
   }
-  .seg button.active{background:var(--panel); color:var(--ink); box-shadow:var(--shadow-1); font-weight:600}
+  .seg button.active{background:#2C2C2E; color:var(--ink); box-shadow:var(--shadow-1); font-weight:600}
 
   .chat{
     flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain;
@@ -123,14 +130,14 @@
     scrollbar-width:thin;
   }
   .chat::-webkit-scrollbar{width:8px}
-  .chat::-webkit-scrollbar-thumb{background:#dfdad2; border-radius:4px}
+  .chat::-webkit-scrollbar-thumb{background:#3A3A3C; border-radius:4px}
   .chat-inner{width:100%; max-width:700px; margin:auto auto 0; padding-bottom:10px}
   .chat-inner.is-empty{margin-top:auto; margin-bottom:auto; padding-bottom:0}
 
   .day{display:flex; justify-content:center; margin:16px 0 14px}
   .day span{
-    background:rgba(255,255,255,.9); border:1px solid var(--line); border-radius:999px;
-    padding:4px 12px; font-size:11.5px; color:var(--ink-2); letter-spacing:.01em;
+    background:var(--day); border:1px solid var(--line); border-radius:999px;
+    padding:4px 12px; font-size:11.5px; color:var(--ink-3); letter-spacing:.01em;
     box-shadow:var(--shadow-1); white-space:nowrap;
   }
 
@@ -141,7 +148,7 @@
   .msg-time{font-size:10.5px; color:var(--ink-3); order:1; white-space:nowrap; padding-bottom:3px; letter-spacing:.01em}
   .msg-wrap{order:2; display:flex; flex-direction:column; align-items:flex-end; gap:4px; max-width:min(80%, 480px)}
   .msg-bubble{
-    max-width:100%; background:var(--bubble); border:1px solid var(--line); border-radius:16px;
+    max-width:100%; background:var(--bubble); border:1px solid var(--bubble-line); border-radius:16px;
     padding:9px 13px; box-shadow:var(--shadow-1);
     font-size:14.5px; line-height:1.58; letter-spacing:-.005em;
     white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere;
@@ -149,16 +156,16 @@
     cursor:default; touch-action:pan-y;
     transition:background .2s ease, color .2s ease, border-color .2s ease;
   }
-  .msg.done .msg-bubble{background:#f3f1ed; border-color:var(--line-soft); color:#8c857c; box-shadow:none}
+  .msg.done .msg-bubble{background:#1E1E20; border-color:var(--line-soft); color:#86868C; box-shadow:none}
   .msg.struck .msg-text{text-decoration:line-through; text-decoration-thickness:1px; text-underline-offset:2px}
-  .msg.done.struck .msg-text{text-decoration-color:#b3aca3}
+  .msg.done.struck .msg-text{text-decoration-color:#5A5A5E}
   .msg-badges{display:flex; gap:4px; padding-right:2px}
   .badge{
     display:inline-flex; align-items:center; gap:3px; font-size:10.5px; color:var(--ink-3);
-    background:rgba(255,255,255,.85); border:1px solid var(--line); border-radius:999px; padding:1px 7px;
+    background:#1E1E20; border:1px solid var(--line); border-radius:999px; padding:1px 7px;
   }
-  .badge .star{font-size:9px; color:#5a534b; transform:translateY(-.5px)}
-  .msg.done .badge{color:#a39c93}
+  .badge .star{font-size:9px; color:#F0F0F2; transform:translateY(-.5px)}
+  .msg.done .badge{color:#75757B}
 
   .empty{text-align:center; padding:64px 20px; color:var(--ink-3)}
   .empty-t{margin:0 0 6px; font-size:14px; color:var(--ink-2)}
@@ -170,15 +177,15 @@
   }
   .composer textarea{
     flex:1; min-width:0; min-height:40px; max-height:132px; padding:10px 13px; font:inherit;
-    font-size:14.5px; line-height:1.5; color:var(--ink); background:var(--panel);
+    font-size:14.5px; line-height:1.5; color:var(--ink); background:var(--field);
     border:1px solid var(--line); border-radius:13px; resize:none; outline:none; overflow-y:auto;
     transition:border-color .15s ease, box-shadow .15s ease;
   }
-  .composer textarea::placeholder{color:#b3aca3}
-  .composer textarea:focus{border-color:#cfc8bd; box-shadow:0 0 0 3px rgba(27,25,23,.04)}
+  .composer textarea::placeholder{color:var(--placeholder)}
+  .composer textarea:focus{border-color:#4A4A4E; box-shadow:0 0 0 3px rgba(240,240,242,.05)}
   .send-btn{
     flex:0 0 auto; height:40px; padding:0 16px; font-size:13.5px; font-weight:500; letter-spacing:.01em;
-    color:#fff; background:var(--ink); border:1px solid var(--ink); border-radius:13px; cursor:pointer;
+    color:#141414; background:#F0F0F2; border:1px solid #F0F0F2; border-radius:13px; cursor:pointer;
     transition:opacity .15s ease;
   }
   .send-btn:hover{opacity:.86}
@@ -187,7 +194,7 @@
   /* ── overlay / sheet ─────────────────────── */
   .overlay{
     position:fixed; inset:0; z-index:50; display:flex; align-items:flex-end; justify-content:center;
-    background:rgba(27,25,23,.26); opacity:0; transition:opacity .16s ease;
+    background:rgba(0,0,0,.58); opacity:0; transition:opacity .16s ease;
     -webkit-backdrop-filter:blur(1px); backdrop-filter:blur(1px);
   }
   .overlay[hidden]{display:none}
@@ -199,7 +206,7 @@
     box-shadow:var(--shadow-2); transform:translateY(14px); transition:transform .18s cubic-bezier(.2,.7,.3,1);
   }
   .overlay.show .sheet{transform:translateY(0)}
-  .sheet-grip{width:36px; height:4px; border-radius:2px; background:#e2ddd5; margin:6px auto 8px}
+  .sheet-grip{width:36px; height:4px; border-radius:2px; background:#3A3A3C; margin:6px auto 8px}
   .sheet-preview{
     margin:2px 6px 8px; padding:10px 12px; font-size:12.5px; line-height:1.5; color:var(--ink-2);
     background:var(--tint); border-radius:11px; max-height:74px; overflow:hidden;
@@ -239,30 +246,30 @@
   .sheet-title{font-size:14px; font-weight:600; padding:8px 12px 10px; letter-spacing:-.01em}
   .dlg-input{
     width:calc(100% - 24px); margin:0 12px; padding:11px 13px; font:inherit; font-size:14.5px;
-    color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:11px; outline:none;
+    color:var(--ink); background:var(--field); border:1px solid var(--line); border-radius:11px; outline:none;
   }
-  .dlg-input:focus{border-color:#cfc8bd; box-shadow:0 0 0 3px rgba(27,25,23,.04)}
+  .dlg-input:focus{border-color:#4A4A4E; box-shadow:0 0 0 3px rgba(240,240,242,.05)}
   .dlg-actions{display:flex; gap:8px; padding:14px 12px 4px}
   .dlg-actions button{
     flex:1; padding:12px; font:inherit; font-size:14px; border-radius:12px; cursor:pointer;
     background:var(--panel); border:1px solid var(--line); color:var(--ink-2);
   }
   .dlg-actions button:hover{background:var(--tint)}
-  .dlg-actions button.primary{background:var(--ink); border-color:var(--ink); color:#fff}
+  .dlg-actions button.primary{background:#F0F0F2; border-color:#F0F0F2; color:#141414; font-weight:600}
   .dlg-actions button.primary:hover{opacity:.86}
-  .dlg-actions button.primary.danger{background:var(--danger); border-color:var(--danger)}
+  .dlg-actions button.primary.danger{background:var(--danger-bg); border-color:var(--danger-bg); color:#FCEBE8}
 
   .toast{
     position:fixed; left:50%; bottom:calc(86px + env(safe-area-inset-bottom)); z-index:60;
     transform:translate(-50%, 8px); display:flex; align-items:center; gap:14px;
     max-width:calc(100% - 32px); padding:10px 15px; border-radius:12px;
-    background:rgba(27,25,23,.94); color:#fff; font-size:13px; letter-spacing:-.005em;
+    background:#2C2C2E; border:1px solid #3C3C3F; color:var(--ink); font-size:13px; letter-spacing:-.005em;
     box-shadow:var(--shadow-2); opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease;
   }
   .toast.show{opacity:1; transform:translate(-50%, 0); pointer-events:auto}
   .toast-btn{
     background:none; border:0; padding:0; font:inherit; font-size:13px; font-weight:600;
-    color:#fff; text-decoration:underline; text-underline-offset:3px; cursor:pointer; white-space:nowrap;
+    color:var(--ink); text-decoration:underline; text-underline-offset:3px; cursor:pointer; white-space:nowrap;
   }
 
   @media (max-width:760px){
@@ -802,7 +809,7 @@
   function openConfirm(title, desc, okLabel, kind, id, danger) {
     openSheet(
       '<div class="sheet-title">' + esc(title) + '</div>' +
-      '<p class="sheet-note" style="margin:0 14px 6px;font-size:12.5px;color:#635d56">' + esc(desc) + '</p>' +
+      '<p class="sheet-note" style="margin:0 14px 6px;font-size:12.5px;color:var(--ink-2)">' + esc(desc) + '</p>' +
       '<div class="dlg-actions">' +
         '<button data-act="dialog/cancel">취소</button>' +
         '<button class="primary' + (danger ? ' danger' : '') + '" data-act="confirm/ok">' + esc(okLabel) + '</button>' +

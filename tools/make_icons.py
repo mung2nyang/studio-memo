@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""스튜디오 메모 PWA 아이콘 생성 (웜그레이 모노톤 말풍선).
+"""스튜디오 메모 PWA 아이콘 생성 (다크 모노톤 말풍선).
 
 512 좌표계로 설계하고 4배 슈퍼샘플링 후 LANCZOS 리샘플링해
 192x192 / 512x512 PNG를 만든다. 마스커블 안전영역(중앙 80%) 안에 그림이 들어가도록
 여백을 둔다.
+
+다크 테마에 맞춰 바탕은 #18181A, 말풍선은 #ECECEE,
+말풍선 안쪽 두 줄 라인은 다시 바탕색 #18181A로 반전해 그린다.
 """
 from PIL import Image, ImageDraw
 
@@ -11,8 +14,9 @@ S = 4                      # supersample factor
 BASE = 512                 # design canvas size
 CANVAS = BASE * S
 
-BG = (247, 246, 243, 255)  # #F7F6F3
-INK = (31, 31, 31, 255)    # #1F1F1F
+BG = (24, 24, 26, 255)     # #18181A
+INK = (236, 236, 238, 255)  # #ECECEE
+LINE = (24, 24, 26, 255)   # #18181A
 
 
 def sc(*vals):
@@ -32,7 +36,7 @@ def draw_icon() -> Image.Image:
 
     # 안쪽 텍스트 라인 2줄
     for x0, x1, y0, y1 in ((154, 288, 195, 217), (154, 338, 255, 277)):
-        d.rounded_rectangle(sc(x0, y0, x1, y1), radius=11 * S, fill=BG)
+        d.rounded_rectangle(sc(x0, y0, x1, y1), radius=11 * S, fill=LINE)
 
     return img
 

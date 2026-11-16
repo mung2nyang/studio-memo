@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#faf9f6">
+<meta name="color-scheme" content="light">
+<title>스튜디오 메모</title>
+<style>
+  :root{
+    --bg:#f8f7f4;
+    --panel:#ffffff;
+    --line:#e7e3dd;
+    --line-soft:#f0ede8;
+    --ink:#1b1917;
+    --ink-2:#635d56;
+    --ink-3:#9a938b;
+    --bubble:#ffffff;
+    --tint:#f4f2ee;
+    --danger:#9a3b31;
+    --shadow-1:0 1px 2px rgba(27,25,23,.05);
+    --shadow-2:0 10px 34px rgba(27,25,23,.14);
+    --font:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Malgun Gothic", "Segoe UI", system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; font-family:var(--font); background:var(--bg); color:var(--ink);
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    overflow:hidden;
+  }
+  button{font-family:inherit}
+  :focus-visible{outline:2px solid #b9b2a7; outline-offset:2px}
+
+  .app{display:flex; height:100vh; height:100dvh; overflow:hidden}
+
+  /* ── sidebar ─────────────────────────────── */
+  .sidebar{
+    width:252px; flex:0 0 252px; background:var(--panel);
+    border-right:1px solid var(--line); display:flex; flex-direction:column; min-height:0;
+  }
+  .side-head{padding:20px 18px 10px; display:flex; align-items:center; gap:8px}
+  .brand{font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
+  .side-label{padding:10px 20px 8px; font-size:11.5px; letter-spacing:.06em; color:var(--ink-3)}
+  .folder-list{flex:1; min-height:0; overflow-y:auto; padding:0 10px 12px}
+  .folder-wrap{display:flex; align-items:center; gap:2px; border-radius:11px; margin-bottom:2px}
+  .folder-wrap:hover{background:var(--tint)}
+  .folder-wrap.active{background:var(--tint)}
+  .folder{
+    flex:1; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:3px;
+    padding:10px 6px 10px 10px; background:none; border:0; border-radius:11px;
+    text-align:left; cursor:pointer; color:var(--ink);
+  }
+  .folder .fname{
+    font-size:14px; font-weight:500; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .folder-wrap.active .fname{font-weight:600}
+  .folder .fcount{font-size:11px; color:var(--ink-3); letter-spacing:.01em}
+  .folder-more{
+    flex:0 0 28px; width:28px; height:28px; margin-right:6px; border:0; background:none; border-radius:8px;
+    color:var(--ink-3); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .folder-more:hover{background:#ebe7e1; color:var(--ink)}
+  .side-foot{padding:10px 14px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid var(--line-soft)}
+  .side-add{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:10px; font-size:13.5px; color:var(--ink-2);
+    background:var(--panel); border:1px solid var(--line); border-radius:11px; cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .side-add:hover{background:var(--tint); border-color:#ddd7cf}
+
+  /* ── main ────────────────────────────────── */
+  .main{flex:1; min-width:0; display:flex; flex-direction:column; background:var(--bg)}
+  .topbar{
+    display:flex; align-items:center; gap:8px; padding:10px 14px;
+    background:rgba(255,255,255,.9); border-bottom:1px solid var(--line);
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); z-index:5;
+  }
+  .icon-btn{
+    flex:0 0 34px; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center;
+    background:none; border:1px solid transparent; border-radius:10px; color:var(--ink-2); cursor:pointer;
+  }
+  .icon-btn:hover{background:var(--tint); color:var(--ink)}
+  .icon-btn svg{width:18px; height:18px; display:block}
+  .menu-btn{display:none}
+  .title-block{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px}
+  .room-title{
+    display:inline-flex; align-items:center; gap:5px; max-width:100%;
+    background:none; border:0; padding:0; cursor:default; text-align:left; color:var(--ink);
+    font-size:15px; font-weight:600; letter-spacing:-.01em;
+  }
+  .room-title .rname{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .room-title .chev{display:none; color:var(--ink-3); font-size:11px; transform:translateY(-1px)}
+  .room-sub{font-size:11.5px; color:var(--ink-3); letter-spacing:.01em}
+  .top-actions{display:flex; align-items:center; gap:2px}
+
+  .toolbar{display:flex; align-items:center; gap:10px; padding:10px 14px 10px; flex-wrap:wrap}
+  .search{flex:1 1 180px; min-width:0; position:relative; display:flex; align-items:center}
+  .search svg{position:absolute; left:11px; width:15px; height:15px; color:var(--ink-3); pointer-events:none}
+  .search input{
+    width:100%; height:34px; padding:0 12px 0 32px; font:inherit; font-size:13.5px; color:var(--ink);
+    background:var(--panel); border:1px solid var(--line); border-radius:10px; outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .search input::placeholder{color:#b3aca3}
+  .search input:focus{border-color:#cfc8bd; box-shadow:0 0 0 3px rgba(27,25,23,.04)}
+  .seg{display:inline-flex; gap:2px; padding:2px; background:#efebe5; border-radius:10px}
+  .seg button{
+    border:0; background:none; padding:6px 11px; font-size:12.5px; color:var(--ink-2);
+    border-radius:8px; cursor:pointer; white-space:nowrap;
+  }
+  .seg button.active{background:var(--panel); color:var(--ink); box-shadow:var(--shadow-1); font-weight:600}
+
+  .chat{
+    flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch; padding:16px 18px 4px;
+    display:flex; flex-direction:column;
+    scrollbar-width:thin;
+  }
+  .chat::-webkit-scrollbar{width:8px}
+  .chat::-webkit-scrollbar-thumb{background:#dfdad2; border-radius:4px}
+  .chat-inner{width:100%; max-width:700px; margin:auto auto 0; padding-bottom:10px}
+  .chat-inner.is-empty{margin-top:auto; margin-bottom:auto; padding-bottom:0}
+
+  .day{display:flex; justify-content:center; margin:16px 0 14px}
+  .day span{
+    background:rgba(255,255,255,.9); border:1px solid var(--line); border-radius:999px;
+    padding:4px 12px; font-size:11.5px; color:var(--ink-2); letter-spacing:.01em;
+    box-shadow:var(--shadow-1); white-space:nowrap;
+  }
+
+  .msg{
+    display:flex; justify-content:flex-end; align-items:flex-end; gap:7px;
+    margin:0 0 9px; -webkit-tap-highlight-color:transparent;
+  }
+  .msg-time{font-size:10.5px; color:var(--ink-3); order:1; white-space:nowrap; padding-bottom:3px; letter-spacing:.01em}
+  .msg-wrap{order:2; display:flex; flex-direction:column; align-items:flex-end; gap:4px; max-width:min(80%, 480px)}
+  .msg-bubble{
+    max-width:100%; background:var(--bubble); border:1px solid var(--line); border-radius:16px;
+    padding:9px 13px; box-shadow:var(--shadow-1);
+    font-size:14.5px; line-height:1.58; letter-spacing:-.005em;
+    white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere;
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+    cursor:default; touch-action:pan-y;
+    transition:background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .msg.done .msg-bubble{background:#f3f1ed; border-color:var(--line-soft); color:#8c857c; box-shadow:none}
+  .msg.struck .msg-text{text-decoration:line-through; text-decoration-thickness:1px; text-underline-offset:2px}
+  .msg.done.struck .msg-text{text-decoration-color:#b3aca3}
+  .msg-badges{display:flex; gap:4px; padding-right:2px}
+  .badge{
+    display:inline-flex; align-items:center; gap:3px; font-size:10.5px; color:var(--ink-3);
+    background:rgba(255,255,255,.85); border:1px solid var(--line); border-radius:999px; padding:1px 7px;
+  }
+  .badge .star{font-size:9px; color:#5a534b; transform:translateY(-.5px)}
+  .msg.done .badge{color:#a39c93}
+
+  .empty{text-align:center; padding:64px 20px; color:var(--ink-3)}
+  .empty-t{margin:0 0 6px; font-size:14px; color:var(--ink-2)}
+  .empty-s{margin:0; font-size:12.5px; line-height:1.6}
+
+  .composer{
+    display:flex; align-items:flex-end; gap:8px; padding:10px 14px calc(12px + env(safe-area-inset-bottom));
+    background:var(--panel); border-top:1px solid var(--line);
+  }
+  .composer textarea{
+    flex:1; min-width:0; min-height:40px; max-height:132px; padding:10px 13px; font:inherit;
+    font-size:14.5px; line-height:1.5; color:var(--ink); background:var(--panel);
+    border:1px solid var(--line); border-radius:13px; resize:none; outline:none; overflow-y:auto;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .composer textarea::placeholder{color:#b3aca3}
+  .composer textarea:focus{border-color:#cfc8bd; box-shadow:0 0 0 3px rgba(27,25,23,.04)}
+  .send-btn{
+    flex:0 0 auto; height:40px; padding:0 16px; font-size:13.5px; font-weight:500; letter-spacing:.01em;
+    color:#fff; background:var(--ink); border:1px solid var(--ink); border-radius:13px; cursor:pointer;
+    transition:opacity .15s ease;
+  }
+  .send-btn:hover{opacity:.86}
+  .send-btn:active{opacity:.72}
+
+  /* ── overlay / sheet ─────────────────────── */
+  .overlay{
+    position:fixed; inset:0; z-index:50; display:flex; align-items:flex-end; justify-content:center;
+    background:rgba(27,25,23,.26); opacity:0; transition:opacity .16s ease;
+    -webkit-backdrop-filter:blur(1px); backdrop-filter:blur(1px);
+  }
+  .overlay[hidden]{display:none}
+  .overlay.show{opacity:1}
+  .sheet{
+    width:100%; max-width:430px; max-height:88vh; overflow-y:auto;
+    background:var(--panel); border:1px solid var(--line); border-bottom:none;
+    border-radius:20px 20px 0 0; padding:8px 10px calc(12px + env(safe-area-inset-bottom));
+    box-shadow:var(--shadow-2); transform:translateY(14px); transition:transform .18s cubic-bezier(.2,.7,.3,1);
+  }
+  .overlay.show .sheet{transform:translateY(0)}
+  .sheet-grip{width:36px; height:4px; border-radius:2px; background:#e2ddd5; margin:6px auto 8px}
+  .sheet-preview{
+    margin:2px 6px 8px; padding:10px 12px; font-size:12.5px; line-height:1.5; color:var(--ink-2);
+    background:var(--tint); border-radius:11px; max-height:74px; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .sheet-item{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%;
+    padding:14px 12px; background:none; border:0; border-radius:12px; font:inherit;
+    font-size:14.5px; color:var(--ink); text-align:left; cursor:pointer;
+  }
+  .sheet-item:hover{background:var(--tint)}
+  .sheet-item .mark{font-size:12px; color:var(--ink-2)}
+  .sheet-item.danger{color:var(--danger)}
+  .sheet-sep{height:1px; background:var(--line-soft); margin:6px 12px}
+  .sheet-note{margin:6px 14px 2px; font-size:11.5px; color:var(--ink-3); line-height:1.5}
+
+  .sheet-head{display:flex; align-items:center; justify-content:space-between; padding:4px 8px 8px}
+  .sheet-head .t{font-size:12px; color:var(--ink-3); font-weight:600}
+  .sheet-x{border:0; background:none; color:var(--ink-3); font-size:17px; line-height:1; cursor:pointer; padding:6px 8px; border-radius:8px}
+  .sheet-x:hover{background:var(--tint); color:var(--ink)}
+  .folder-row-wrap{display:flex; align-items:center; gap:2px; border-radius:12px}
+  .folder-row-wrap:hover{background:var(--tint)}
+  .folder-row-wrap.active{background:var(--tint)}
+  .folder-row{
+    flex:1; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:13px 4px 13px 12px; background:none; border:0; font:inherit; font-size:14px;
+    color:var(--ink); text-align:left; cursor:pointer;
+  }
+  .folder-row .cnt{font-size:11px; color:var(--ink-3); white-space:nowrap}
+  .sheet-add{
+    display:flex; align-items:center; justify-content:center; gap:6px; width:100%; margin-top:6px;
+    padding:13px; font:inherit; font-size:13.5px; color:var(--ink-2);
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; cursor:pointer;
+  }
+  .sheet-add:hover{background:var(--tint)}
+
+  .sheet-title{font-size:14px; font-weight:600; padding:8px 12px 10px; letter-spacing:-.01em}
+  .dlg-input{
+    width:calc(100% - 24px); margin:0 12px; padding:11px 13px; font:inherit; font-size:14.5px;
+    color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:11px; outline:none;
+  }
+  .dlg-input:focus{border-color:#cfc8bd; box-shadow:0 0 0 3px rgba(27,25,23,.04)}
+  .dlg-actions{display:flex; gap:8px; padding:14px 12px 4px}
+  .dlg-actions button{
+    flex:1; padding:12px; font:inherit; font-size:14px; border-radius:12px; cursor:pointer;
+    background:var(--panel); border:1px solid var(--line); color:var(--ink-2);
+  }
+  .dlg-actions button:hover{background:var(--tint)}
+  .dlg-actions button.primary{background:var(--ink); border-color:var(--ink); color:#fff}
+  .dlg-actions button.primary:hover{opacity:.86}
+  .dlg-actions button.primary.danger{background:var(--danger); border-color:var(--danger)}
+
+  .toast{
+    position:fixed; left:50%; bottom:calc(86px + env(safe-area-inset-bottom)); z-index:60;
+    transform:translate(-50%, 8px); display:flex; align-items:center; gap:14px;
+    max-width:calc(100% - 32px); padding:10px 15px; border-radius:12px;
+    background:rgba(27,25,23,.94); color:#fff; font-size:13px; letter-spacing:-.005em;
+    box-shadow:var(--shadow-2); opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease;
+  }
+  .toast.show{opacity:1; transform:translate(-50%, 0); pointer-events:auto}
+  .toast-btn{
+    background:none; border:0; padding:0; font:inherit; font-size:13px; font-weight:600;
+    color:#fff; text-decoration:underline; text-underline-offset:3px; cursor:pointer; white-space:nowrap;
+  }
+
+  @media (max-width:760px){
+    .sidebar{display:none}
+    .menu-btn{display:inline-flex}
+    .room-title{cursor:pointer}
+    .room-title .chev{display:inline}
+    .chat{padding:12px 12px 2px}
+    .chat-inner{max-width:100%}
+    .msg-wrap{max-width:82%}
+    .toolbar{padding:9px 12px; gap:8px}
+    .search{flex:1 1 100%; order:1}
+    .seg{order:2; width:100%; justify-content:space-between}
+    .seg button{flex:1; text-align:center; padding:6px 4px}
+    .composer{padding:9px 12px calc(10px + env(safe-area-inset-bottom))}
+    .topbar{padding:8px 10px}
+  }
+  @media (min-width:761px){
+    .overlay{align-items:center}
+    .sheet{border-radius:18px; border-bottom:1px solid var(--line); padding-bottom:10px}
+    .sheet-grip{display:none}
+    .sheet-item + .sheet-item{border-top:1px solid var(--line-soft); border-radius:0}
+    .sheet-item{border-radius:0}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition-duration:.01ms !important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" aria-label="프로젝트 목록">
+    <div class="side-head"><span class="brand">Studio Memo</span></div>
+    <div class="side-label">프로젝트</div>
+    <div class="folder-list" id="folderList"></div>
+    <div class="side-foot">
+      <button class="side-add" id="sideAdd">+ 새 프로젝트</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="프로젝트 목록 열기">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3.5 6h13M3.5 10h13M3.5 14h13"/></svg>
+      </button>
+      <div class="title-block">
+        <button class="room-title" id="roomTitle" aria-label="프로젝트 전환">
+          <span class="rname" id="roomName">프로젝트</span><span class="chev">▾</span>
+        </button>
+        <span class="room-sub" id="roomSub"></span>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="exportBtn" title="JSON 내보내기" aria-label="JSON 내보내기">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.2v8.4"/><path d="M6.8 8.6 10 11.8l3.2-3.2"/><path d="M4.2 15.4h11.6"/></svg>
+        </button>
+        <button class="icon-btn" id="importBtn" title="JSON 가져오기" aria-label="JSON 가져오기">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 11.6V3.2"/><path d="M6.8 6.4 10 3.2l3.2 3.2"/><path d="M4.2 15.4h11.6"/></svg>
+        </button>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8.8" cy="8.8" r="5.1"/><path d="M12.6 12.6 16 16"/></svg>
+        <input type="search" id="searchInput" placeholder="메모 검색" autocomplete="off" aria-label="메모 검색">
+      </label>
+      <div class="seg" id="seg" role="tablist" aria-label="메모 필터">
+        <button data-filter="all" class="active" role="tab" aria-selected="true">전체</button>
+        <button data-filter="important" role="tab" aria-selected="false">중요</button>
+        <button data-filter="open" role="tab" aria-selected="false">미완료</button>
+      </div>
+    </div>
+
+    <div class="chat" id="chat" aria-live="polite"></div>
+
+    <div class="composer">
+      <textarea id="input" rows="1" placeholder="메모를 남겨보세요" aria-label="메모 입력"></textarea>
+      <button class="send-btn" id="sendBtn">전송</button>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" id="overlay" hidden></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'studio.memo.v1';
+  var LONG_PRESS_MS = 450;
+  var MOVE_TOLERANCE = 10;
+
+  var state = null;
+  var filter = 'all';
+  var query = '';
+  var storageWarned = false;
+  var sheetCtx = null;
+  var actionId = null;
+  var undoBuffer = null;
+  var pendingImport = null;
+  var toastTimer = null;
+  var pressTimer = null;
+  var pressStart = { x: 0, y: 0 };
+  var pressTarget = null;
+  var composing = false;
+  var pressFired = false;
+
+  var el = {};
+
+  /* ── helpers ─────────────────────────────── */
+  function $(id) { return document.getElementById(id); }
+  function uid() { return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function nowTs() { return Date.now(); }
+
+  function timeLabel(ts) {
+    var d = new Date(ts);
+    var h = d.getHours();
+    var ap = h < 12 ? '오전' : '오후';
+    var hh = h % 12; if (hh === 0) { hh = 12; }
+    return ap + ' ' + hh + ':' + pad2(d.getMinutes());
+  }
+  function dayKey(ts) {
+    var d = new Date(ts);
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+  function dayLabel(ts) {
+    var d = new Date(ts);
+    var t = new Date();
+    var today = new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime();
+    var that = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    var diff = Math.round((today - that) / 86400000);
+    if (diff === 0) { return '오늘'; }
+    if (diff === 1) { return '어제'; }
+    return d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' +
+      '일월화수목금토'.charAt(d.getDay()) + '요일';
+  }
+
+  /* ── data ────────────────────────────────── */
+  function makeFolder(name) {
+    return { id: uid(), name: name, messages: [] };
+  }
+  function defaultState() {
+    var a = makeFolder('운행일지');
+    var b = makeFolder('탭답 트래블');
+    return { version: 1, activeId: a.id, folders: [a, b] };
+  }
+  function normalizeFolderList(list) {
+    if (!Array.isArray(list)) { return null; }
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var f = list[i];
+      if (!f || typeof f !== 'object') { continue; }
+      var name = (typeof f.name === 'string' && f.name.trim()) ? f.name.trim().slice(0, 40) : '프로젝트';
+      var msgs = [];
+      var raw = Array.isArray(f.messages) ? f.messages : [];
+      for (var j = 0; j < raw.length; j++) {
+        var m = raw[j];
+        if (!m || typeof m !== 'object') { continue; }
+        var text = typeof m.text === 'string' ? m.text : '';
+        if (!text) { continue; }
+        msgs.push({
+          id: uid(),
+          text: text,
+          ts: Number(m.ts) || nowTs(),
+          done: !!m.done,
+          important: !!m.important,
+          struck: !!m.struck
+        });
+      }
+      msgs.sort(function (x, y) { return x.ts - y.ts; });
+      out.push({ id: uid(), name: name, messages: msgs });
+    }
+    if (!out.length) { return null; }
+    return out;
+  }
+  function sanitizeState(raw) {
+    if (!raw || typeof raw !== 'object' || !Array.isArray(raw.folders)) { return null; }
+    var folders = [];
+    for (var i = 0; i < raw.folders.length; i++) {
+      var f = raw.folders[i];
+      if (!f || typeof f !== 'object') { continue; }
+      var msgs = [];
+      var rawMsgs = Array.isArray(f.messages) ? f.messages : [];
+      for (var j = 0; j < rawMsgs.length; j++) {
+        var m = rawMsgs[j];
+        if (!m || typeof m !== 'object' || typeof m.text !== 'string' || !m.text) { continue; }
+        msgs.push({
+          id: typeof m.id === 'string' && m.id ? m.id : uid(),
+          text: m.text,
+          ts: Number(m.ts) || nowTs(),
+          done: !!m.done,
+          important: !!m.important,
+          struck: !!m.struck
+        });
+      }
+      folders.push({
+        id: typeof f.id === 'string' && f.id ? f.id : uid(),
+        name: (typeof f.name === 'string' && f.name.trim()) ? f.name.trim().slice(0, 40) : '프로젝트',
+        messages: msgs
+      });
+    }
+    if (!folders.length) { return null; }
+    var activeId = typeof raw.activeId === 'string' ? raw.activeId : '';
+    if (!folders.some(function (f) { return f.id === activeId; })) { activeId = folders[0].id; }
+    return { version: 1, activeId: activeId, folders: folders };
+  }
+
+  function load() {
+    var raw = null;
+    try { raw = localStorage.getItem(STORAGE_KEY); }
+    catch (e) { raw = null; storageWarned = true; }
+    if (raw) {
+      var parsed = null;
+      try { parsed = JSON.parse(raw); } catch (e2) { parsed = null; }
+      var clean = sanitizeState(parsed);
+      if (clean) { state = clean; return; }
+    }
+    state = defaultState();
+    save();
+  }
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      if (!storageWarned) {
+        storageWarned = true;
+        toast('이 브라우저에서는 자동 저장이 막혀 있어요. JSON으로 백업해 주세요.');
+      }
+    }
+  }
+
+  /* ── selectors ───────────────────────────── */
+  function currentFolder() {
+    if (!state.folders.length) { return null; }
+    var f = null;
+    for (var i = 0; i < state.folders.length; i++) {
+      if (state.folders[i].id === state.activeId) { f = state.folders[i]; break; }
+    }
+    if (!f) { f = state.folders[0]; state.activeId = f.id; }
+    return f;
+  }
+  function countOpen(folder) {
+    var n = 0;
+    for (var i = 0; i < folder.messages.length; i++) { if (!folder.messages[i].done) { n++; } }
+    return n;
+  }
+  function visibleMessages(folder) {
+    var q = query.trim().toLowerCase();
+    return folder.messages.filter(function (m) {
+      if (filter === 'important' && !m.important) { return false; }
+      if (filter === 'open' && m.done) { return false; }
+      if (q && m.text.toLowerCase().indexOf(q) === -1) { return false; }
+      return true;
+    });
+  }
+
+  /* ── render ──────────────────────────────── */
+  function renderSidebar() {
+    var html = '';
+    for (var i = 0; i < state.folders.length; i++) {
+      var f = state.folders[i];
+      var active = f.id === state.activeId;
+      html += '<div class="folder-wrap' + (active ? ' active' : '') + '">' +
+        '<button class="folder" data-folder="' + f.id + '" aria-current="' + (active ? 'true' : 'false') + '">' +
+          '<span class="fname">' + esc(f.name) + '</span>' +
+          '<span class="fcount">미완료 ' + countOpen(f) + ' · 전체 ' + f.messages.length + '</span>' +
+        '</button>' +
+        '<button class="folder-more" data-folder-more="' + f.id + '" aria-label="' + esc(f.name) + ' 폴더 메뉴">' +
+          '<svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><circle cx="4.5" cy="10" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="15.5" cy="10" r="1.4"/></svg>' +
+        '</button>' +
+      '</div>';
+    }
+    el.folderList.innerHTML = html;
+  }
+
+  function renderHeader() {
+    var f = currentFolder();
+    if (!f) { el.roomName.textContent = '프로젝트'; el.roomSub.textContent = ''; return; }
+    el.roomName.textContent = f.name;
+    el.roomSub.textContent = '전체 ' + f.messages.length + ' · 미완료 ' + countOpen(f);
+    document.title = f.name + ' · 스튜디오 메모';
+  }
+
+  function renderChat(opts) {
+    opts = opts || {};
+    var f = currentFolder();
+    if (!f) { el.chat.innerHTML = ''; return; }
+    var keep = el.chat.scrollTop;
+    var list = visibleMessages(f);
+
+    if (!list.length) {
+      var hasAny = f.messages.length > 0;
+      el.chat.innerHTML = '<div class="chat-inner is-empty"><div class="empty">' +
+        (hasAny
+          ? '<p class="empty-t">조건에 맞는 메모가 없어요</p><p class="empty-s">검색어나 필터를 바꿔보세요.</p>'
+          : '<p class="empty-t">아직 메모가 없어요</p><p class="empty-s">아래에 첫 메모를 남겨보세요.<br>메모를 꾹 누르면 완료·중요·줄긋기·삭제 메뉴가 열려요.</p>') +
+        '</div></div>';
+      return;
+    }
+
+    var html = '<div class="chat-inner">';
+    var lastDay = null;
+    for (var i = 0; i < list.length; i++) {
+      var m = list[i];
+      var k = dayKey(m.ts);
+      if (k !== lastDay) {
+        html += '<div class="day"><span>' + dayLabel(m.ts) + '</span></div>';
+        lastDay = k;
+      }
+      var cls = 'msg' + (m.done ? ' done' : '') + (m.important ? ' important' : '') + (m.struck ? ' struck' : '');
+      var badges = '';
+      if (m.done || m.important) {
+        badges = '<div class="msg-badges">' +
+          (m.done ? '<span class="badge">✓ 완료</span>' : '') +
+          (m.important ? '<span class="badge"><span class="star">★</span>중요</span>' : '') +
+          '</div>';
+      }
+      html += '<div class="' + cls + '" data-id="' + m.id + '">' +
+        '<span class="msg-time">' + timeLabel(m.ts) + '</span>' +
+        '<div class="msg-wrap">' +
+          '<div class="msg-bubble"><span class="msg-text">' + esc(m.text) + '</span></div>' +
+          badges +
+        '</div>' +
+      '</div>';
+    }
+    html += '</div>';
+    el.chat.innerHTML = html;
+    if (opts.toEnd) {
+      scrollToEnd();
+      requestAnimationFrame(function () { scrollToEnd(); });
+    } else {
+      el.chat.scrollTop = keep;
+    }
+  }
+
+  function renderAll(opts) {
+    renderSidebar();
+    renderHeader();
+    renderChat(opts);
+  }
+  function scrollToEnd() { el.chat.scrollTop = el.chat.scrollHeight; }
+
+  /* ── messages ────────────────────────────── */
+  function addMessage() {
+    var f = currentFolder();
+    if (!f) { return; }
+    var text = el.input.value.replace(/^[ \t]+|[ \t\n\r]+$/g, '');
+    if (!text) { el.input.focus(); return; }
+    if (filter !== 'all' || query) { filter = 'all'; query = ''; el.searchInput.value = ''; syncSeg(); }
+    f.messages.push({ id: uid(), text: text, ts: nowTs(), done: false, important: false, struck: false });
+    el.input.value = '';
+    autoGrow();
+    save();
+    renderAll({ toEnd: true });
+    el.input.focus();
+  }
+
+  function findMessage(id) {
+    var f = currentFolder();
+    if (!f) { return { folder: null, msg: null, index: -1 }; }
+    for (var i = 0; i < f.messages.length; i++) {
+      if (f.messages[i].id === id) { return { folder: f, msg: f.messages[i], index: i }; }
+    }
+    return { folder: f, msg: null, index: -1 };
+  }
+
+  function toggleMessageFlag(id, flag) {
+    var hit = findMessage(id);
+    if (!hit.msg) { return null; }
+    hit.msg[flag] = !hit.msg[flag];
+    save();
+    renderAll();
+    return hit.msg[flag];
+  }
+
+  function deleteMessage(id) {
+    var hit = findMessage(id);
+    if (!hit.msg) { return; }
+    undoBuffer = { folderId: hit.folder.id, index: hit.index, message: hit.msg };
+    hit.folder.messages.splice(hit.index, 1);
+    save();
+    renderAll();
+  }
+  function undoDelete() {
+    if (!undoBuffer) { return; }
+    var buf = undoBuffer;
+    undoBuffer = null;
+    var folder = null;
+    for (var i = 0; i < state.folders.length; i++) {
+      if (state.folders[i].id === buf.folderId) { folder = state.folders[i]; break; }
+    }
+    if (!folder) { hideToast(); return; }
+    folder.messages.splice(Math.min(buf.index, folder.messages.length), 0, buf.message);
+    save();
+    renderAll();
+    hideToast();
+    toast('메모를 되살렸어요');
+  }
+
+  /* ── folders ─────────────────────────────── */
+  function addFolder(name) {
+    var f = makeFolder((name && name.trim()) ? name.trim().slice(0, 40) : '새 프로젝트');
+    state.folders.push(f);
+    state.activeId = f.id;
+    filter = 'all'; query = ''; el.searchInput.value = ''; syncSeg();
+    save();
+    renderAll({ toEnd: true });
+  }
+  function renameFolder(id, name) {
+    var clean = (name || '').trim().slice(0, 40);
+    if (!clean) { toast('이름을 입력해 주세요'); return; }
+    for (var i = 0; i < state.folders.length; i++) {
+      if (state.folders[i].id === id) { state.folders[i].name = clean; break; }
+    }
+    save();
+    renderAll();
+  }
+  function deleteFolder(id) {
+    if (state.folders.length <= 1) { toast('폴더가 하나뿐이라 삭제할 수 없어요'); return; }
+    var idx = -1;
+    for (var i = 0; i < state.folders.length; i++) { if (state.folders[i].id === id) { idx = i; break; } }
+    if (idx < 0) { return; }
+    state.folders.splice(idx, 1);
+    if (state.activeId === id) { state.activeId = state.folders[Math.max(0, idx - 1)].id; }
+    save();
+    renderAll({ toEnd: true });
+  }
+  function switchFolder(id) {
+    closeOverlay();
+    if (state.activeId === id) { return; }
+    state.activeId = id;
+    filter = 'all'; query = ''; el.searchInput.value = ''; syncSeg();
+    save();
+    renderAll({ toEnd: true });
+  }
+
+  /* ── overlay ─────────────────────────────── */
+  function openSheet(html, ctx) {
+    sheetCtx = ctx || null;
+    el.overlay.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="sheet-grip"></div>' + html + '</div>';
+    el.overlay.hidden = false;
+    requestAnimationFrame(function () { el.overlay.classList.add('show'); });
+  }
+  function closeOverlay() {
+    if (el.overlay.hidden) { return; }
+    el.overlay.classList.remove('show');
+    sheetCtx = null;
+    actionId = null;
+    var node = el.overlay;
+    setTimeout(function () {
+      if (!node.classList.contains('show')) { node.hidden = true; node.innerHTML = ''; }
+    }, 170);
+  }
+
+  function openMessageActions(id) {
+    var hit = findMessage(id);
+    if (!hit.msg) { return; }
+    var m = hit.msg;
+    actionId = id;
+    var preview = m.text.replace(/\s+/g, ' ').slice(0, 90);
+    if (m.text.length > 90) { preview += '…'; }
+    openSheet(
+      '<div class="sheet-preview">' + esc(preview) + '</div>' +
+      '<button class="sheet-item" data-act="msg/done"><span>완료했다</span>' + (m.done ? '<span class="mark">✓</span>' : '') + '</button>' +
+      '<button class="sheet-item" data-act="msg/important"><span>중요표시</span>' + (m.important ? '<span class="mark">★</span>' : '') + '</button>' +
+      '<button class="sheet-item" data-act="msg/strike"><span>글자에 줄긋기</span>' + (m.struck ? '<span class="mark">✓</span>' : '') + '</button>' +
+      '<div class="sheet-sep"></div>' +
+      '<button class="sheet-item danger" data-act="msg/delete"><span>삭제</span></button>',
+      { kind: 'message', id: id }
+    );
+  }
+
+  function folderRowHTML(f, withMore) {
+    var active = f.id === state.activeId;
+    return '<div class="folder-row-wrap' + (active ? ' active' : '') + '">' +
+      '<button class="folder-row" data-act="folder/open" data-id="' + f.id + '">' +
+        '<span class="fname">' + esc(f.name) + '</span>' +
+        '<span class="cnt">미완료 ' + countOpen(f) + ' · 전체 ' + f.messages.length + '</span>' +
+      '</button>' +
+      (withMore
+        ? '<button class="folder-more" data-act="folder/menu" data-id="' + f.id + '" aria-label="' + esc(f.name) + ' 폴더 메뉴">' +
+            '<svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><circle cx="4.5" cy="10" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="15.5" cy="10" r="1.4"/></svg>' +
+          '</button>'
+        : '') +
+    '</div>';
+  }
+
+  function openFolderSheet() {
+    var html = '<div class="sheet-head"><span class="t">프로젝트</span>' +
+      '<button class="sheet-x" data-act="close" aria-label="닫기">✕</button></div>';
+    for (var i = 0; i < state.folders.length; i++) { html += folderRowHTML(state.folders[i], true); }
+    html += '<button class="sheet-add" data-act="folder/add">+ 새 프로젝트</button>';
+    openSheet(html, { kind: 'folders' });
+  }
+
+  function openFolderMenu(id) {
+    var f = null;
+    for (var i = 0; i < state.folders.length; i++) { if (state.folders[i].id === id) { f = state.folders[i]; break; } }
+    if (!f) { return; }
+    openSheet(
+      '<div class="sheet-preview">' + esc(f.name) + ' · 메모 ' + f.messages.length + '개</div>' +
+      '<button class="sheet-item" data-act="folder/rename"><span>이름 바꾸기</span></button>' +
+      '<button class="sheet-item" data-act="folder/switch"><span>이 프로젝트 열기</span></button>' +
+      '<div class="sheet-sep"></div>' +
+      '<button class="sheet-item danger" data-act="folder/delete"><span>폴더 삭제</span></button>',
+      { kind: 'folderMenu', id: id }
+    );
+  }
+
+  function openTextDialog(title, value, ctx) {
+    openSheet(
+      '<div class="sheet-title">' + esc(title) + '</div>' +
+      '<input class="dlg-input" id="dlgInput" type="text" maxlength="40" value="' + esc(value || '') + '" placeholder="프로젝트 이름">' +
+      '<div class="dlg-actions">' +
+        '<button data-act="dialog/cancel">취소</button>' +
+        '<button class="primary" data-act="dialog/save">저장</button>' +
+      '</div>',
+      ctx
+    );
+    var input = $('dlgInput');
+    if (input) {
+      setTimeout(function () { input.focus(); input.select(); }, 60);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); saveDialogValue(); }
+      });
+    }
+  }
+
+  function openConfirm(title, desc, okLabel, kind, id, danger) {
+    openSheet(
+      '<div class="sheet-title">' + esc(title) + '</div>' +
+      '<p class="sheet-note" style="margin:0 14px 6px;font-size:12.5px;color:#635d56">' + esc(desc) + '</p>' +
+      '<div class="dlg-actions">' +
+        '<button data-act="dialog/cancel">취소</button>' +
+        '<button class="primary' + (danger ? ' danger' : '') + '" data-act="confirm/ok">' + esc(okLabel) + '</button>' +
+      '</div>',
+      { kind: kind, id: id }
+    );
+  }
+
+  function saveDialogValue() {
+    var input = $('dlgInput');
+    var value = input ? input.value : '';
+    if (!sheetCtx) { return; }
+    var kind = sheetCtx.kind;
+    var id = sheetCtx.id;
+    closeOverlay();
+    if (kind === 'newFolder') { addFolder(value); }
+    else if (kind === 'renameFolder') { renameFolder(id, value); }
+  }
+
+  /* ── actions ─────────────────────────────── */
+  function handleSheetAction(act, btn) {
+    if (act === 'close') { closeOverlay(); return; }
+    if (act === 'dialog/cancel') { closeOverlay(); return; }
+    if (act === 'dialog/save') { saveDialogValue(); return; }
+    if (act === 'confirm/ok') {
+      var ctx = sheetCtx || {};
+      closeOverlay();
+      if (ctx.kind === 'deleteFolder') { deleteFolder(ctx.id); toast('폴더를 삭제했어요'); }
+      else if (ctx.kind === 'import') {
+        if (pendingImport) {
+          state.folders = pendingImport;
+          state.activeId = pendingImport[0].id;
+          pendingImport = null;
+          filter = 'all'; query = ''; el.searchInput.value = ''; syncSeg();
+          save();
+          renderAll({ toEnd: true });
+          toast('메모를 가져왔어요');
+        }
+      }
+      return;
+    }
+
+    if (act.indexOf('msg/') === 0) {
+      var id = (sheetCtx && sheetCtx.kind === 'message') ? sheetCtx.id : actionId;
+      if (!id) { closeOverlay(); return; }
+      if (act === 'msg/done') {
+        closeOverlay();
+        var done = toggleMessageFlag(id, 'done');
+        toast(done ? '완료로 표시했어요' : '완료를 해제했어요');
+      } else if (act === 'msg/important') {
+        closeOverlay();
+        var imp = toggleMessageFlag(id, 'important');
+        toast(imp ? '중요로 표시했어요' : '중요표시를 해제했어요');
+      } else if (act === 'msg/strike') {
+        closeOverlay();
+        var st = toggleMessageFlag(id, 'struck');
+        toast(st ? '줄을 그었어요' : '줄을 지웠어요');
+      } else if (act === 'msg/delete') {
+        closeOverlay();
+        deleteMessage(id);
+        toast('메모를 삭제했어요', '실행취소');
+      }
+      return;
+    }
+
+    if (act === 'folder/open') { switchFolder(btn.getAttribute('data-id')); return; }
+    if (act === 'folder/switch') {
+      var fid = sheetCtx && sheetCtx.id;
+      closeOverlay();
+      if (fid) { switchFolder(fid); }
+      return;
+    }
+    if (act === 'folder/menu') { openFolderMenu(btn.getAttribute('data-id')); return; }
+    if (act === 'folder/add') { openTextDialog('새 프로젝트', '', { kind: 'newFolder' }); return; }
+    if (act === 'folder/rename') {
+      var rid = sheetCtx && sheetCtx.id;
+      var f = null;
+      for (var i = 0; i < state.folders.length; i++) { if (state.folders[i].id === rid) { f = state.folders[i]; break; } }
+      if (f) { openTextDialog('이름 바꾸기', f.name, { kind: 'renameFolder', id: f.id }); }
+      return;
+    }
+    if (act === 'folder/delete') {
+      var did = sheetCtx && sheetCtx.id;
+      var target = null;
+      for (var j = 0; j < state.folders.length; j++) { if (state.folders[j].id === did) { target = state.folders[j]; break; } }
+      if (!target) { return; }
+      if (state.folders.length <= 1) { closeOverlay(); toast('폴더가 하나뿐이라 삭제할 수 없어요'); return; }
+      openConfirm('폴더를 삭제할까요?', '“' + target.name + '” 폴더와 메모 ' + target.messages.length + '개가 함께 지워져요.', '삭제', 'deleteFolder', target.id, true);
+      return;
+    }
+  }
+
+  /* ── long press ──────────────────────────── */
+  function cancelPress() {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    pressTarget = null;
+  }
+  /* 손을 뗄 때 브라우저가 만드는 합성 클릭 한 번을 무시해,
+     방금 연 시트가 즉시 닫히는 것을 막는다. */
+  function swallowOneClick() {
+    var timer = null;
+    function cleanup() {
+      document.removeEventListener('click', handler, true);
+      if (timer) { clearTimeout(timer); timer = null; }
+    }
+    function handler(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) { e.stopImmediatePropagation(); }
+      cleanup();
+    }
+    document.addEventListener('click', handler, true);
+    timer = setTimeout(cleanup, 400);
+  }
+  function releasePress() {
+    cancelPress();
+    if (pressFired) {
+      pressFired = false;
+      swallowOneClick();
+    }
+  }
+  function startPress(target, x, y) {
+    pressTarget = target;
+    pressStart.x = x;
+    pressStart.y = y;
+    pressFired = false;
+    if (pressTimer) { clearTimeout(pressTimer); }
+    pressTimer = setTimeout(function () {
+      pressTimer = null;
+      if (!pressTarget) { return; }
+      var id = pressTarget.getAttribute('data-id');
+      pressTarget = null;
+      if (!id) { return; }
+      if (!el.overlay.hidden) { return; }
+      pressFired = true;
+      if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+      openMessageActions(id);
+    }, LONG_PRESS_MS);
+  }
+  function movePress(x, y) {
+    if (!pressTarget) { return; }
+    var dx = Math.abs(x - pressStart.x);
+    var dy = Math.abs(y - pressStart.y);
+    if (dx > MOVE_TOLERANCE || dy > MOVE_TOLERANCE) { cancelPress(); }
+  }
+  function bindLongPress() {
+    var chat = el.chat;
+
+    if (window.PointerEvent) {
+      chat.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse' && e.button !== 0) { return; }
+        var msg = e.target.closest ? e.target.closest('.msg') : null;
+        if (!msg || (e.target.closest('.msg-time'))) { return; }
+        startPress(msg, e.clientX, e.clientY);
+      });
+      chat.addEventListener('pointermove', function (e) {
+        if (pressTarget) { movePress(e.clientX, e.clientY); }
+      }, { passive: true });
+      chat.addEventListener('pointerup', releasePress);
+      chat.addEventListener('pointercancel', releasePress);
+      chat.addEventListener('pointerleave', cancelPress);
+    } else {
+      chat.addEventListener('touchstart', function (e) {
+        if (e.touches.length !== 1) { cancelPress(); return; }
+        var msg = e.target.closest ? e.target.closest('.msg') : null;
+        if (!msg) { return; }
+        var t = e.touches[0];
+        startPress(msg, t.clientX, t.clientY);
+      }, { passive: true });
+      chat.addEventListener('touchmove', function (e) {
+        if (!pressTarget || !e.touches.length) { return; }
+        movePress(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: true });
+      chat.addEventListener('touchend', releasePress, { passive: true });
+      chat.addEventListener('touchcancel', releasePress, { passive: true });
+    }
+
+    chat.addEventListener('contextmenu', function (e) {
+      var msg = e.target.closest ? e.target.closest('.msg') : null;
+      if (!msg) { return; }
+      e.preventDefault();
+      cancelPress();
+      openMessageActions(msg.getAttribute('data-id'));
+    });
+
+    chat.addEventListener('scroll', cancelPress, { passive: true });
+    window.addEventListener('scroll', cancelPress, { passive: true });
+  }
+
+  /* ── toast ───────────────────────────────── */
+  function toast(message, action) {
+    el.toast.innerHTML = '';
+    var span = document.createElement('span');
+    span.textContent = message;
+    el.toast.appendChild(span);
+    if (action) {
+      var b = document.createElement('button');
+      b.className = 'toast-btn';
+      b.type = 'button';
+      b.textContent = action;
+      b.addEventListener('click', function () { undoDelete(); });
+      el.toast.appendChild(b);
+    }
+    el.toast.classList.add('show');
+    if (toastTimer) { clearTimeout(toastTimer); }
+    toastTimer = setTimeout(function () { hideToast(); }, action ? 6500 : 2200);
+  }
+  function hideToast() {
+    if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+    el.toast.classList.remove('show');
+  }
+
+  /* ── import / export ─────────────────────── */
+  function exportJSON() {
+    var payload = {
+      app: 'studio-memo',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      folders: state.folders
+    };
+    var text = JSON.stringify(payload, null, 2);
+    var d = new Date();
+    var name = 'studio-memo-' + d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '.json';
+    try {
+      var blob = new Blob([text], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.parentNode.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+      toast('JSON 파일로 내보냈어요');
+    } catch (e) {
+      toast('내보내지 못했어요');
+    }
+  }
+
+  function totalMessages(folders) {
+    var n = 0;
+    for (var i = 0; i < folders.length; i++) { n += folders[i].messages.length; }
+    return n;
+  }
+
+  function onImportFile(e) {
+    var file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) { return; }
+    var reader = new FileReader();
+    reader.onload = function () {
+      var parsed = null;
+      try { parsed = JSON.parse(String(reader.result)); } catch (err) { parsed = null; }
+      if (!parsed) { toast('JSON 파일을 읽지 못했어요'); return; }
+      var folders = normalizeFolderList(parsed.folders || (Array.isArray(parsed) ? parsed : null));
+      if (!folders) { toast('메모 파일 형식이 아니에요'); return; }
+      pendingImport = folders;
+      openConfirm(
+        '가져올까요?',
+        '지금 메모 ' + totalMessages(state.folders) + '개가 가져온 메모 ' + totalMessages(folders) + '개(' + folders.length + '개 프로젝트)로 바뀌어요.',
+        '가져오기', 'import', null, false
+      );
+    };
+    reader.onerror = function () { toast('파일을 읽지 못했어요'); };
+    reader.readAsText(file);
+  }
+
+  /* ── misc UI ─────────────────────────────── */
+  function autoGrow() {
+    el.input.style.height = 'auto';
+    var h = Math.min(el.input.scrollHeight, 132);
+    el.input.style.height = h + 'px';
+  }
+  function syncSeg() {
+    var btns = el.seg.querySelectorAll('button');
+    for (var i = 0; i < btns.length; i++) {
+      var on = btns[i].getAttribute('data-filter') === filter;
+      btns[i].classList.toggle('active', on);
+      btns[i].setAttribute('aria-selected', on ? 'true' : 'false');
+    }
+  }
+
+  function bind() {
+    el.input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) {
+        e.preventDefault();
+        addMessage();
+      }
+    });
+    el.input.addEventListener('input', autoGrow);
+    el.input.addEventListener('compositionstart', function () { composing = true; });
+    el.input.addEventListener('compositionend', function () { composing = false; });
+    el.sendBtn.addEventListener('click', function () { addMessage(); });
+
+    el.folderList.addEventListener('click', function (e) {
+      var more = e.target.closest('[data-folder-more]');
+      if (more) { openFolderMenu(more.getAttribute('data-folder-more')); return; }
+      var f = e.target.closest('[data-folder]');
+      if (f) { switchFolder(f.getAttribute('data-folder')); }
+    });
+
+    el.sideAdd.addEventListener('click', function () { openTextDialog('새 프로젝트', '', { kind: 'newFolder' }); });
+    el.roomTitle.addEventListener('click', function () {
+      if (window.matchMedia('(max-width:760px)').matches) { openFolderSheet(); }
+    });
+    el.menuBtn.addEventListener('click', openFolderSheet);
+
+    el.seg.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-filter]');
+      if (!b) { return; }
+      filter = b.getAttribute('data-filter');
+      syncSeg();
+      renderChat({ toEnd: false });
+    });
+
+    el.searchInput.addEventListener('input', function () {
+      query = el.searchInput.value;
+      renderChat({ toEnd: false });
+    });
+
+    el.exportBtn.addEventListener('click', exportJSON);
+    el.importBtn.addEventListener('click', function () { el.importFile.click(); });
+    el.importFile.addEventListener('change', onImportFile);
+
+    el.overlay.addEventListener('click', function (e) {
+      if (e.target === el.overlay) { closeOverlay(); return; }
+      var btn = e.target.closest('[data-act]');
+      if (!btn) { return; }
+      handleSheetAction(btn.getAttribute('data-act'), btn);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !el.overlay.hidden) { closeOverlay(); }
+    });
+
+    bindLongPress();
+  }
+
+  function init() {
+    el.folderList = $('folderList');
+    el.sideAdd = $('sideAdd');
+    el.roomName = $('roomName');
+    el.roomSub = $('roomSub');
+    el.roomTitle = $('roomTitle');
+    el.menuBtn = $('menuBtn');
+    el.seg = $('seg');
+    el.searchInput = $('searchInput');
+    el.chat = $('chat');
+    el.input = $('input');
+    el.sendBtn = $('sendBtn');
+    el.exportBtn = $('exportBtn');
+    el.importBtn = $('importBtn');
+    el.importFile = $('importFile');
+    el.overlay = $('overlay');
+    el.toast = $('toast');
+
+    load();
+    bind();
+    renderAll({ toEnd: true });
+    el.chat.scrollTop = el.chat.scrollHeight;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

@@ -172,15 +172,72 @@
   .empty-s{margin:0; font-size:12.5px; line-height:1.6}
 
   .composer{
-    display:flex; align-items:flex-end; gap:8px; padding:10px 14px calc(12px + env(safe-area-inset-bottom));
+    display:flex; flex-direction:column; align-items:stretch; gap:8px;
+    padding:10px 14px calc(12px + env(safe-area-inset-bottom));
     background:var(--panel); border-top:1px solid var(--line);
   }
+  .composer-row{display:flex; align-items:flex-end; gap:8px}
+  .attach-btn{
+    flex:0 0 36px; width:36px; height:36px; margin-bottom:2px; display:inline-flex;
+    align-items:center; justify-content:center; background:none; border:1px solid var(--line);
+    border-radius:11px; color:var(--ink-3); cursor:pointer;
+  }
+  .attach-btn:hover{background:var(--tint); color:var(--ink)}
+  .attach-btn svg{width:17px; height:17px; display:block}
   .composer textarea{
     flex:1; min-width:0; min-height:40px; max-height:132px; padding:10px 13px; font:inherit;
     font-size:14.5px; line-height:1.5; color:var(--ink); background:var(--field);
     border:1px solid var(--line); border-radius:13px; resize:none; outline:none; overflow-y:auto;
+    scrollbar-width:none; -ms-overflow-style:none;
     transition:border-color .15s ease, box-shadow .15s ease;
   }
+  .composer textarea::-webkit-scrollbar{display:none; width:0; height:0}
+
+  .attach-strip{display:flex; gap:6px; overflow-x:auto; padding:0 1px; scrollbar-width:none}
+  .attach-strip[hidden]{display:none}
+  .attach-strip::-webkit-scrollbar{display:none}
+  .attach-thumb{
+    position:relative; flex:0 0 58px; width:58px; height:58px; border-radius:10px;
+    overflow:hidden; border:1px solid var(--line); background:var(--field);
+  }
+  .attach-thumb img{width:100%; height:100%; object-fit:cover; display:block}
+  .attach-x{
+    position:absolute; top:2px; right:2px; width:19px; height:19px; padding:0; border:0; border-radius:50%;
+    background:rgba(0,0,0,.62); color:#fff; font-size:11px; line-height:19px; text-align:center; cursor:pointer;
+  }
+  .attach-x:hover{background:rgba(0,0,0,.82)}
+
+  /* ── image messages ──────────────────────── */
+  .msg-bubble.only-media{padding:5px}
+  .msg-media{display:grid; gap:3px; width:242px; max-width:100%}
+  .msg-media.n1{grid-template-columns:1fr}
+  .msg-media.n2, .msg-media.n3, .msg-media.n4{grid-template-columns:1fr 1fr}
+  .msg-text + .msg-media{margin-top:7px}
+  .media-btn{
+    display:block; padding:0; border:0; background:none; cursor:pointer; overflow:hidden;
+    border-radius:11px; line-height:0;
+  }
+  .msg-media.n1 .media-btn{border-radius:11px}
+  .msg-media img{
+    width:100%; display:block; border-radius:11px; object-fit:cover;
+    aspect-ratio:auto; -webkit-touch-callout:none; -webkit-user-drag:none; user-select:none; pointer-events:none;
+  }
+  .msg-media.n1 img{max-height:300px}
+  .msg-media.n2 img, .msg-media.n3 img, .msg-media.n4 img{aspect-ratio:1 / 1}
+  .msg.done .msg-media img{opacity:.68}
+
+  .lightbox{
+    position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,.94); padding:16px;
+  }
+  .lightbox[hidden]{display:none}
+  .lightbox img{max-width:100%; max-height:100%; object-fit:contain; border-radius:6px}
+  .lb-close{
+    position:absolute; top:calc(10px + env(safe-area-inset-top)); right:12px; width:38px; height:38px;
+    border:0; border-radius:50%; background:rgba(255,255,255,.12); color:#F0F0F2; font-size:16px;
+    line-height:1; cursor:pointer;
+  }
+  .lb-close:hover{background:rgba(255,255,255,.2)}
   .composer textarea::placeholder{color:var(--placeholder)}
   .composer textarea:focus{border-color:#4A4A4E; box-shadow:0 0 0 3px rgba(240,240,242,.05)}
   .send-btn{
@@ -394,14 +451,25 @@
     <div class="chat" id="chat" aria-live="polite"></div>
 
     <div class="composer">
-      <textarea id="input" rows="1" placeholder="메모를 남겨보세요" aria-label="메모 입력"></textarea>
-      <button class="send-btn" id="sendBtn">전송</button>
+      <div class="attach-strip" id="attachStrip" hidden></div>
+      <div class="composer-row">
+        <button class="attach-btn" id="attachBtn" title="사진 첨부" aria-label="사진 첨부">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="12" rx="2.6"/><circle cx="7.6" cy="8.2" r="1.3"/><path d="M3.6 14.2 7.7 10l3 3 2-1.9 3.7 3.5"/></svg>
+        </button>
+        <input type="file" id="imageFile" accept="image/*" multiple hidden>
+        <textarea id="input" rows="1" placeholder="메모를 남겨보세요" aria-label="메모 입력"></textarea>
+        <button class="send-btn" id="sendBtn">전송</button>
+      </div>
     </div>
   </main>
 </div>
 
 <div class="overlay" id="overlay" hidden></div>
 <div class="toast" id="toast" role="status"></div>
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lb-close" id="lbClose" aria-label="닫기">✕</button>
+  <img id="lbImg" alt="첨부 사진 크게 보기">
+</div>
 
 <script>
 (function () {
@@ -422,6 +490,8 @@
   var pendingImport = null;
   var keys = { version: 1, items: [] };
   var revealedKeys = {};
+  var pendingImages = [];
+  var MAX_PENDING = 4;
   var toastTimer = null;
   var pressTimer = null;
   var pressStart = { x: 0, y: 0 };
@@ -487,15 +557,18 @@
         var m = raw[j];
         if (!m || typeof m !== 'object') { continue; }
         var text = typeof m.text === 'string' ? m.text : '';
-        if (!text) { continue; }
-        msgs.push({
+        var imgs = sanitizeImages(m.images, m.img);
+        if (!text && !imgs.length) { continue; }
+        var item = {
           id: uid(),
           text: text,
           ts: Number(m.ts) || nowTs(),
           done: !!m.done,
           important: !!m.important,
           struck: !!m.struck
-        });
+        };
+        if (imgs.length) { item.images = imgs; }
+        msgs.push(item);
       }
       msgs.sort(function (x, y) { return x.ts - y.ts; });
       out.push({ id: uid(), name: name, messages: msgs });
@@ -503,6 +576,18 @@
     if (!out.length) { return null; }
     return out;
   }
+  function sanitizeImages(list, single) {
+    var raw = [];
+    if (Array.isArray(list)) { raw = list; }
+    else if (typeof single === 'string') { raw = [single]; }
+    var out = [];
+    for (var i = 0; i < raw.length && out.length < MAX_PENDING; i++) {
+      var v = raw[i];
+      if (typeof v === 'string' && /^data:image\/(png|jpe?g|webp);base64,/.test(v)) { out.push(v); }
+    }
+    return out;
+  }
+
   function sanitizeState(raw) {
     if (!raw || typeof raw !== 'object' || !Array.isArray(raw.folders)) { return null; }
     var folders = [];
@@ -513,15 +598,20 @@
       var rawMsgs = Array.isArray(f.messages) ? f.messages : [];
       for (var j = 0; j < rawMsgs.length; j++) {
         var m = rawMsgs[j];
-        if (!m || typeof m !== 'object' || typeof m.text !== 'string' || !m.text) { continue; }
-        msgs.push({
+        if (!m || typeof m !== 'object') { continue; }
+        var text = typeof m.text === 'string' ? m.text : '';
+        var imgs = sanitizeImages(m.images, m.img);
+        if (!text && !imgs.length) { continue; }
+        var clean = {
           id: typeof m.id === 'string' && m.id ? m.id : uid(),
-          text: m.text,
+          text: text,
           ts: Number(m.ts) || nowTs(),
           done: !!m.done,
           important: !!m.important,
           struck: !!m.struck
-        });
+        };
+        if (imgs.length) { clean.images = imgs; }
+        msgs.push(clean);
       }
       folders.push({
         id: typeof f.id === 'string' && f.id ? f.id : uid(),
@@ -551,11 +641,16 @@
   function save() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      return true;
     } catch (e) {
-      if (!storageWarned) {
+      var quota = e && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22 || e.code === 1014);
+      if (quota) {
+        toast('저장 공간이 부족해요. 설정에서 백업 후 오래된 사진을 정리해 주세요');
+      } else if (!storageWarned) {
         storageWarned = true;
         toast('이 브라우저에서는 자동 저장이 막혀 있어요. JSON으로 백업해 주세요.');
       }
+      return false;
     }
   }
 
@@ -648,7 +743,10 @@
       html += '<div class="' + cls + '" data-id="' + m.id + '">' +
         '<span class="msg-time">' + timeLabel(m.ts) + '</span>' +
         '<div class="msg-wrap">' +
-          '<div class="msg-bubble"><span class="msg-text">' + esc(m.text) + '</span></div>' +
+          '<div class="msg-bubble' + (m.text ? '' : ' only-media') + '">' +
+            (m.text ? '<span class="msg-text">' + esc(m.text) + '</span>' : '') +
+            ((m.images && m.images.length) ? renderMedia(m) : '') +
+          '</div>' +
           badges +
         '</div>' +
       '</div>';
@@ -675,14 +773,22 @@
     var f = currentFolder();
     if (!f) { return; }
     var text = el.input.value.replace(/^[ \t]+|[ \t\n\r]+$/g, '');
-    if (!text) { el.input.focus(); return; }
+    if (!text && !pendingImages.length) { el.input.focus(); return; }
     if (filter !== 'all' || query) { filter = 'all'; query = ''; el.searchInput.value = ''; syncSeg(); }
-    f.messages.push({ id: uid(), text: text, ts: nowTs(), done: false, important: false, struck: false });
+    var msg = { id: uid(), text: text, ts: nowTs(), done: false, important: false, struck: false };
+    if (pendingImages.length) { msg.images = pendingImages.slice(); }
+    f.messages.push(msg);
     el.input.value = '';
     autoGrow();
-    save();
-    renderAll({ toEnd: true });
-    el.input.focus();
+    if (save()) {
+      clearPendingImages();
+      renderAll({ toEnd: true });
+      el.input.focus();
+    } else {
+      // 저장에 실패했으면(저장 공간 부족) 화면과 저장 내용을 같게 유지한다
+      f.messages.pop();
+      renderAll();
+    }
   }
 
   function findMessage(id) {
@@ -788,8 +894,13 @@
     if (!hit.msg) { return; }
     var m = hit.msg;
     actionId = id;
-    var preview = m.text.replace(/\s+/g, ' ').slice(0, 90);
-    if (m.text.length > 90) { preview += '…'; }
+    var preview;
+    if (m.text) {
+      var flat = m.text.replace(/\s+/g, ' ');
+      preview = flat.slice(0, 90) + (flat.length > 90 ? '…' : '');
+    } else {
+      preview = '사진 ' + ((m.images && m.images.length) || 0) + '장';
+    }
     openSheet(
       '<div class="sheet-preview">' + esc(preview) + '</div>' +
       '<button class="sheet-item" data-act="msg/done"><span>완료했다</span>' + (m.done ? '<span class="mark">✓</span>' : '') + '</button>' +
@@ -1295,6 +1406,118 @@
     });
   }
 
+  /* ── 사진 첨부 ──────────────────────────── */
+  function renderMedia(m) {
+    var imgs = m.images || [];
+    var html = '<div class="msg-media n' + Math.min(imgs.length, 4) + '">';
+    for (var i = 0; i < imgs.length; i++) {
+      html += '<button class="media-btn" type="button" data-img="' + m.id + '" data-index="' + i + '" aria-label="사진 크게 보기">' +
+        '<img src="' + imgs[i] + '" alt="첨부 사진" loading="lazy">' +
+      '</button>';
+    }
+    return html + '</div>';
+  }
+
+  /* 선택한 사진을 최대 긴 변 960px, JPEG 0.72로 줄여 dataURL로 만든다.
+     localStorage 5MB 안에서 여러 장을 넣기 위한 압축 단계. */
+  function compressImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = null;
+      try { url = URL.createObjectURL(file); } catch (e) { reject(e); return; }
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var MAX = 960;
+          var w = img.naturalWidth || img.width;
+          var h = img.naturalHeight || img.height;
+          if (!w || !h) { throw new Error('empty'); }
+          var scale = Math.min(1, MAX / Math.max(w, h));
+          var tw = Math.max(1, Math.round(w * scale));
+          var th = Math.max(1, Math.round(h * scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = tw;
+          canvas.height = th;
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, tw, th);
+          ctx.drawImage(img, 0, 0, tw, th);
+          var data = canvas.toDataURL('image/jpeg', 0.72);
+          URL.revokeObjectURL(url);
+          resolve(data);
+        } catch (e) {
+          URL.revokeObjectURL(url);
+          reject(e);
+        }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('decode')); };
+      img.src = url;
+    });
+  }
+
+  function handleImageFiles(fileList) {
+    var files = [];
+    for (var i = 0; i < fileList.length; i++) {
+      var f = fileList[i];
+      if (f && (/^image\//.test(f.type) || /\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(f.name || ''))) { files.push(f); }
+    }
+    if (!files.length) { return; }
+    var room = MAX_PENDING - pendingImages.length;
+    if (room <= 0) { toast('사진은 한 번에 ' + MAX_PENDING + '장까지 붙일 수 있어요'); return; }
+    if (files.length > room) {
+      toast('사진은 한 번에 ' + MAX_PENDING + '장까지 붙일 수 있어요');
+      files = files.slice(0, room);
+    }
+    var failed = 0;
+    var chain = Promise.resolve();
+    files.forEach(function (file) {
+      chain = chain.then(function () {
+        return compressImage(file).then(function (data) {
+          pendingImages.push(data);
+          renderAttachStrip();
+        }, function () { failed++; });
+      });
+    });
+    chain.then(function () {
+      if (failed) { toast(failed + '장은 사진을 읽지 못했어요'); }
+    });
+  }
+
+  function clearPendingImages() {
+    pendingImages = [];
+    renderAttachStrip();
+  }
+
+  function renderAttachStrip() {
+    var strip = el.attachStrip;
+    if (!strip) { return; }
+    if (!pendingImages.length) {
+      strip.hidden = true;
+      strip.innerHTML = '';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < pendingImages.length; i++) {
+      html += '<div class="attach-thumb">' +
+        '<img src="' + pendingImages[i] + '" alt="첨부할 사진">' +
+        '<button class="attach-x" type="button" data-remove="' + i + '" aria-label="사진 빼기">✕</button>' +
+      '</div>';
+    }
+    strip.innerHTML = html;
+    strip.hidden = false;
+  }
+
+  function openLightbox(msgId, index) {
+    var hit = findMessage(msgId);
+    if (!hit.msg || !hit.msg.images || !hit.msg.images.length) { return; }
+    el.lbImg.src = hit.msg.images[index] || hit.msg.images[0];
+    el.lightbox.hidden = false;
+  }
+  function closeLightbox() {
+    if (el.lightbox.hidden) { return; }
+    el.lightbox.hidden = true;
+    el.lbImg.removeAttribute('src');
+  }
+
   /* ── import / export ─────────────────────── */
   function exportJSON() {
     var payload = {
@@ -1382,6 +1605,28 @@
     el.input.addEventListener('compositionend', function () { composing = false; });
     el.sendBtn.addEventListener('click', function () { addMessage(); });
 
+    el.attachBtn.addEventListener('click', function () { el.imageFile.click(); });
+    el.imageFile.addEventListener('change', function (e) {
+      var files = e.target.files;
+      if (files && files.length) { handleImageFiles(files); }
+      e.target.value = '';
+    });
+    el.attachStrip.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-remove]');
+      if (!b) { return; }
+      var idx = Number(b.getAttribute('data-remove'));
+      if (idx >= 0 && idx < pendingImages.length) {
+        pendingImages.splice(idx, 1);
+        renderAttachStrip();
+      }
+    });
+    el.chat.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-img]');
+      if (!b) { return; }
+      openLightbox(b.getAttribute('data-img'), Number(b.getAttribute('data-index')) || 0);
+    });
+    el.lightbox.addEventListener('click', closeLightbox);
+
     el.folderList.addEventListener('click', function (e) {
       var more = e.target.closest('[data-folder-more]');
       if (more) { openFolderMenu(more.getAttribute('data-folder-more')); return; }
@@ -1419,7 +1664,10 @@
     });
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !el.overlay.hidden) { closeOverlay(); }
+      if (e.key === 'Escape') {
+        if (!el.lightbox.hidden) { closeLightbox(); return; }
+        if (!el.overlay.hidden) { closeOverlay(); }
+      }
     });
 
     bindLongPress();
@@ -1437,6 +1685,12 @@
     el.chat = $('chat');
     el.input = $('input');
     el.sendBtn = $('sendBtn');
+    el.attachBtn = $('attachBtn');
+    el.attachStrip = $('attachStrip');
+    el.imageFile = $('imageFile');
+    el.lightbox = $('lightbox');
+    el.lbImg = $('lbImg');
+    el.lbClose = $('lbClose');
     el.settingsBtn = $('settingsBtn');
     el.importFile = $('importFile');
     el.overlay = $('overlay');

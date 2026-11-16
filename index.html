@@ -223,7 +223,57 @@
   .sheet-sep{height:1px; background:var(--line-soft); margin:6px 12px}
   .sheet-note{margin:6px 14px 2px; font-size:11.5px; color:var(--ink-3); line-height:1.5}
 
-  .sheet-head{display:flex; align-items:center; justify-content:space-between; padding:4px 8px 8px}
+  /* ── api key vault ─────────────────────── */
+  .key-list{display:flex; flex-direction:column; gap:8px; padding:2px 6px 4px; max-height:54vh; overflow-y:auto}
+  .key-row{padding:12px; background:#202022; border:1px solid var(--line); border-radius:12px}
+  .key-top{display:flex; align-items:center; gap:8px; min-width:0}
+  .key-name{font-size:14px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .key-tag{
+    flex:0 0 auto; max-width:50%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    font-size:10.5px; color:var(--ink-3); border:1px solid var(--line); border-radius:999px; padding:1px 8px;
+  }
+  .key-val{display:flex; align-items:center; gap:4px; margin-top:8px; min-width:0}
+  .key-secret{
+    flex:1; min-width:0; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:12.5px; color:var(--ink-2); letter-spacing:.02em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    -webkit-user-select:text; user-select:text;
+  }
+  .key-secret.revealed{white-space:normal; word-break:break-all; color:var(--ink)}
+  .key-btn{
+    flex:0 0 28px; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center;
+    background:none; border:1px solid transparent; border-radius:8px; color:var(--ink-3); cursor:pointer;
+  }
+  .key-btn:hover{background:#2C2C2E; color:var(--ink)}
+  .key-btn.danger:hover{color:var(--danger)}
+  .key-btn svg{width:15px; height:15px; display:block}
+  .key-note{margin-top:7px; font-size:11.5px; color:var(--ink-3); line-height:1.5; word-break:break-word}
+  .key-empty{padding:26px 12px; text-align:center; font-size:12.5px; line-height:1.7; color:var(--ink-3)}
+
+  .field{margin:0 12px 10px}
+  .field label{display:block; margin:0 0 5px 2px; font-size:11.5px; letter-spacing:.02em; color:var(--ink-3)}
+  .field input, .field select{
+    width:100%; padding:10px 12px; font:inherit; font-size:14px; color:var(--ink);
+    background:var(--field); border:1px solid var(--line); border-radius:11px; outline:none;
+  }
+  .field input::placeholder{color:var(--placeholder)}
+  .field input:focus, .field select:focus{border-color:#4A4A4E; box-shadow:0 0 0 3px rgba(240,240,242,.05)}
+  .field select{
+    -webkit-appearance:none; appearance:none; padding-right:32px; cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%238E8E93' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 12px center; background-size:12px;
+  }
+
+  .sheet-head{display:flex; align-items:center; justify-content:space-between; gap:6px; padding:4px 8px 8px}
+  .sheet-back{
+    border:0; background:none; padding:6px 8px; border-radius:8px; cursor:pointer;
+    font:inherit; font-size:12px; color:var(--ink-3); letter-spacing:-.005em; white-space:nowrap;
+  }
+  .sheet-back:hover{background:#2C2C2E; color:var(--ink)}
+  .sheet-group-label{
+    margin:8px 14px 4px; font-size:11px; font-weight:600;
+    letter-spacing:.09em; color:var(--ink-3);
+  }
   .sheet-head .t{font-size:12px; color:var(--ink-3); font-weight:600}
   .sheet-x{border:0; background:none; color:var(--ink-3); font-size:17px; line-height:1; cursor:pointer; padding:6px 8px; border-radius:8px}
   .sheet-x:hover{background:var(--tint); color:var(--ink)}
@@ -322,11 +372,8 @@
         <span class="room-sub" id="roomSub"></span>
       </div>
       <div class="top-actions">
-        <button class="icon-btn" id="exportBtn" title="JSON 내보내기" aria-label="JSON 내보내기">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.2v8.4"/><path d="M6.8 8.6 10 11.8l3.2-3.2"/><path d="M4.2 15.4h11.6"/></svg>
-        </button>
-        <button class="icon-btn" id="importBtn" title="JSON 가져오기" aria-label="JSON 가져오기">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 11.6V3.2"/><path d="M6.8 6.4 10 3.2l3.2 3.2"/><path d="M4.2 15.4h11.6"/></svg>
+        <button class="icon-btn" id="settingsBtn" title="설정" aria-label="설정">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.5"/><path d="M10 2.9v1.5M10 15.6v1.5M2.9 10h1.5M15.6 10h1.5M5 5l1 1M14 14l1 1M15 5l-1 1M6 14l-1 1"/></svg>
         </button>
         <input type="file" id="importFile" accept=".json,application/json" hidden>
       </div>
@@ -361,6 +408,7 @@
   'use strict';
 
   var STORAGE_KEY = 'studio.memo.v1';
+  var KEY_STORE = 'studio.memo.apikeys.v1';
   var LONG_PRESS_MS = 450;
   var MOVE_TOLERANCE = 10;
 
@@ -372,6 +420,8 @@
   var actionId = null;
   var undoBuffer = null;
   var pendingImport = null;
+  var keys = { version: 1, items: [] };
+  var revealedKeys = {};
   var toastTimer = null;
   var pressTimer = null;
   var pressStart = { x: 0, y: 0 };
@@ -726,6 +776,7 @@
     el.overlay.classList.remove('show');
     sheetCtx = null;
     actionId = null;
+    revealedKeys = {};
     var node = el.overlay;
     setTimeout(function () {
       if (!node.classList.contains('show')) { node.hidden = true; node.innerHTML = ''; }
@@ -840,8 +891,13 @@
       if (ctx.kind === 'deleteFolder') { deleteFolder(ctx.id); toast('폴더를 삭제했어요'); }
       else if (ctx.kind === 'import') {
         if (pendingImport) {
-          state.folders = pendingImport;
-          state.activeId = pendingImport[0].id;
+          state.folders = pendingImport.folders;
+          state.activeId = pendingImport.folders[0].id;
+          if (pendingImport.keys) {
+            keys = pendingImport.keys;
+            revealedKeys = {};
+            saveKeys();
+          }
           pendingImport = null;
           filter = 'all'; query = ''; el.searchInput.value = ''; syncSeg();
           save();
@@ -851,6 +907,26 @@
       }
       return;
     }
+
+    if (act === 'settings') { openSettings(); return; }
+    if (act === 'settings/keys') { openKeyVault(); return; }
+    if (act === 'settings/export') { closeOverlay(); exportJSON(); return; }
+    if (act === 'settings/import') { el.importFile.click(); return; }
+
+    if (act === 'key/add') { openKeyForm(); return; }
+    if (act === 'key/save') { saveKeyForm(); return; }
+    if (act === 'key/cancel') { openKeyVault(); return; }
+    if (act === 'key/reveal') {
+      var kid = btn.getAttribute('data-id');
+      if (kid) { revealedKeys[kid] = !revealedKeys[kid]; refreshKeyList(); }
+      return;
+    }
+    if (act === 'key/copy') {
+      var kit = findKey(btn.getAttribute('data-id'));
+      if (kit) { copyText(kit.key, '“' + kit.name + '” 키를 복사했어요'); }
+      return;
+    }
+    if (act === 'key/delete') { deleteKey(btn.getAttribute('data-id')); return; }
 
     if (act.indexOf('msg/') === 0) {
       var id = (sheetCtx && sheetCtx.kind === 'message') ? sheetCtx.id : actionId;
@@ -1000,7 +1076,7 @@
   }
 
   /* ── toast ───────────────────────────────── */
-  function toast(message, action) {
+  function toast(message, action, onAction) {
     el.toast.innerHTML = '';
     var span = document.createElement('span');
     span.textContent = message;
@@ -1010,7 +1086,7 @@
       b.className = 'toast-btn';
       b.type = 'button';
       b.textContent = action;
-      b.addEventListener('click', function () { undoDelete(); });
+      b.addEventListener('click', function () { if (onAction) { onAction(); } else { undoDelete(); } });
       el.toast.appendChild(b);
     }
     el.toast.classList.add('show');
@@ -1022,13 +1098,211 @@
     el.toast.classList.remove('show');
   }
 
+  /* ── API 키 보관함 ──────────────────────── */
+  var ICON_EYE = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.9 10S5 5 10 5s8.1 5 8.1 5-3.1 5-8.1 5-8.1-5-8.1-5Z"/><circle cx="10" cy="10" r="2.3"/></svg>';
+  var ICON_EYE_OFF = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.9 10S5 5 10 5c1.6 0 3 .5 4.2 1.2"/><path d="M16.2 7.5c1.3 1.4 1.9 2.5 1.9 2.5S15 15 10 15c-1.1 0-2.1-.2-3-.7"/><path d="M3.6 3.6 16.4 16.4"/></svg>';
+  var ICON_COPY = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7.2" y="7.2" width="9" height="9" rx="2"/><path d="M13 4.9v-.6c0-1-.8-1.8-1.8-1.8H4.9c-1 0-1.8.8-1.8 1.8v6.3c0 1 .8 1.8 1.8 1.8h.6"/></svg>';
+  var ICON_TRASH = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 5.6h12.8"/><path d="M8 5.6V4h4v1.6"/><path d="M5.4 5.6 6.1 16h7.8l.7-10.4"/></svg>';
+
+  function sanitizeKeys(raw) {
+    var list = [];
+    if (Array.isArray(raw)) { list = raw; }
+    else if (raw && typeof raw === 'object' && Array.isArray(raw.items)) { list = raw.items; }
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var it = list[i];
+      if (!it || typeof it !== 'object') { continue; }
+      var name = typeof it.name === 'string' ? it.name.trim() : '';
+      var value = typeof it.key === 'string' ? it.key : '';
+      if (!name || !value) { continue; }
+      out.push({
+        id: (typeof it.id === 'string' && it.id) ? it.id : uid(),
+        name: name.slice(0, 40),
+        tag: (typeof it.tag === 'string' && it.tag.trim()) ? it.tag.trim().slice(0, 24) : '공통',
+        key: value,
+        note: typeof it.note === 'string' ? it.note.slice(0, 120) : '',
+        ts: Number(it.ts) || nowTs()
+      });
+    }
+    return { version: 1, items: out };
+  }
+  function loadKeys() {
+    var raw = null;
+    try { raw = localStorage.getItem(KEY_STORE); } catch (e) { raw = null; }
+    if (!raw) { keys = { version: 1, items: [] }; return; }
+    var parsed = null;
+    try { parsed = JSON.parse(raw); } catch (e2) { parsed = null; }
+    keys = sanitizeKeys(parsed);
+  }
+  function saveKeys() {
+    try { localStorage.setItem(KEY_STORE, JSON.stringify(keys)); }
+    catch (e) { toast('API 키를 저장하지 못했어요'); }
+  }
+  function maskKey(v) {
+    if (!v) { return ''; }
+    if (v.length <= 4) { return '••••'; }
+    return '••••••' + v.slice(-4);
+  }
+  function copyText(text, okMessage) {
+    function legacyCopy() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '-1000px'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      return ok;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { toast(okMessage); }, function () {
+        toast(legacyCopy() ? okMessage : '복사하지 못했어요');
+      });
+      return;
+    }
+    toast(legacyCopy() ? okMessage : '복사하지 못했어요');
+  }
+  function findKey(id) {
+    for (var i = 0; i < keys.items.length; i++) { if (keys.items[i].id === id) { return keys.items[i]; } }
+    return null;
+  }
+
+  function openSettings() {
+    openSheet(
+      '<div class="sheet-head"><span class="t">설정</span>' +
+        '<button class="sheet-x" data-act="close" aria-label="닫기">✕</button></div>' +
+      '<div class="sheet-group-label">데이터</div>' +
+      '<button class="sheet-item" data-act="settings/export"><span>JSON 내보내기</span><span class="mark">내려받기</span></button>' +
+      '<button class="sheet-item" data-act="settings/import"><span>JSON 가져오기</span><span class="mark">복원</span></button>' +
+      '<div class="sheet-sep"></div>' +
+      '<div class="sheet-group-label">보관함</div>' +
+      '<button class="sheet-item" data-act="settings/keys"><span>API 키 보관함</span><span class="mark">' +
+        (keys.items.length ? keys.items.length + '개' : '비어 있음') + '</span></button>' +
+      '<div class="sheet-note">메모와 API 키는 이 브라우저에만 저장돼요. 기기를 바꾸기 전에 JSON으로 내려받아 두세요.</div>',
+      { kind: 'settings' }
+    );
+  }
+
+  function openKeyVault() {
+    openSheet(
+      '<div class="sheet-head">' +
+        '<button class="sheet-back" data-act="settings">‹ 설정</button>' +
+        '<span class="t">API 키 보관함</span>' +
+        '<button class="sheet-x" data-act="close" aria-label="닫기">✕</button></div>' +
+      '<div class="key-list" id="keyList"></div>' +
+      '<button class="sheet-add" data-act="key/add">+ 새 키 추가</button>' +
+      '<div class="sheet-note">이 브라우저(localStorage)에만 저장되고 밖으로 보내지 않아요. JSON으로 내려받은 파일에는 키가 그대로 담겨요.</div>',
+      { kind: 'keyVault' }
+    );
+    refreshKeyList();
+  }
+
+  function refreshKeyList() {
+    var list = $('keyList');
+    if (!list) { return; }
+    var top = list.scrollTop;
+    if (!keys.items.length) {
+      list.innerHTML = '<div class="key-empty">저장된 API 키가 없어요.<br>아래에서 첫 키를 추가해 보세요.</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < keys.items.length; i++) {
+      var it = keys.items[i];
+      var open = !!revealedKeys[it.id];
+      html += '<div class="key-row">' +
+        '<div class="key-top"><span class="key-name">' + esc(it.name) + '</span>' +
+          '<span class="key-tag">' + esc(it.tag || '공통') + '</span></div>' +
+        '<div class="key-val">' +
+          '<code class="key-secret' + (open ? ' revealed' : '') + '">' + esc(open ? it.key : maskKey(it.key)) + '</code>' +
+          '<button class="key-btn" data-act="key/reveal" data-id="' + it.id + '" aria-label="' + (open ? '키 숨기기' : '키 보기') + '" title="' + (open ? '숨기기' : '보기') + '">' +
+            (open ? ICON_EYE_OFF : ICON_EYE) + '</button>' +
+          '<button class="key-btn" data-act="key/copy" data-id="' + it.id + '" aria-label="키 복사" title="복사">' + ICON_COPY + '</button>' +
+          '<button class="key-btn danger" data-act="key/delete" data-id="' + it.id + '" aria-label="키 삭제" title="삭제">' + ICON_TRASH + '</button>' +
+        '</div>' +
+        (it.note ? '<div class="key-note">' + esc(it.note) + '</div>' : '') +
+      '</div>';
+    }
+    list.innerHTML = html;
+    list.scrollTop = top;
+  }
+
+  function keyTagOptions(current) {
+    var names = ['공통'];
+    for (var i = 0; i < state.folders.length; i++) {
+      var n = state.folders[i].name;
+      if (names.indexOf(n) === -1) { names.push(n); }
+    }
+    if (current && names.indexOf(current) === -1) { names.push(current); }
+    var html = '';
+    for (var j = 0; j < names.length; j++) {
+      html += '<option value="' + esc(names[j]) + '"' + (current === names[j] ? ' selected' : '') + '>' + esc(names[j]) + '</option>';
+    }
+    return html;
+  }
+
+  function openKeyForm() {
+    openSheet(
+      '<div class="sheet-title">새 API 키</div>' +
+      '<div class="field"><label for="kfName">이름 / 서비스</label>' +
+        '<input id="kfName" type="text" maxlength="40" placeholder="예: Gemini API" autocomplete="off" spellcheck="false"></div>' +
+      '<div class="field"><label for="kfTag">프로젝트 태그</label>' +
+        '<select id="kfTag">' + keyTagOptions('공통') + '</select></div>' +
+      '<div class="field"><label for="kfKey">키 값</label>' +
+        '<input id="kfKey" type="password" maxlength="300" placeholder="API 키를 붙여넣으세요" autocomplete="off" spellcheck="false"></div>' +
+      '<div class="field"><label for="kfNote">메모 (선택)</label>' +
+        '<input id="kfNote" type="text" maxlength="120" placeholder="예: 무료 티어 · 2027-01 만료" autocomplete="off"></div>' +
+      '<div class="dlg-actions">' +
+        '<button data-act="key/cancel">취소</button>' +
+        '<button class="primary" data-act="key/save">저장</button>' +
+      '</div>' +
+      '<div class="sheet-note">키는 이 브라우저에만 저장되고, 목록에서는 끝 4자리만 보여요.</div>',
+      { kind: 'keyForm' }
+    );
+    var input = $('kfName');
+    if (input) { setTimeout(function () { input.focus(); }, 60); }
+  }
+
+  function saveKeyForm() {
+    var nameEl = $('kfName'), tagEl = $('kfTag'), keyEl = $('kfKey'), noteEl = $('kfNote');
+    var name = nameEl ? nameEl.value.trim().slice(0, 40) : '';
+    var tag = tagEl ? tagEl.value : '공통';
+    var value = keyEl ? keyEl.value : '';
+    var note = noteEl ? noteEl.value.trim().slice(0, 120) : '';
+    if (!name) { toast('이름을 입력해 주세요'); if (nameEl) { nameEl.focus(); } return; }
+    if (!value) { toast('키 값을 입력해 주세요'); if (keyEl) { keyEl.focus(); } return; }
+    keys.items.unshift({ id: uid(), name: name, tag: tag || '공통', key: value, note: note, ts: nowTs() });
+    saveKeys();
+    openKeyVault();
+    toast('API 키를 저장했어요');
+  }
+
+  function deleteKey(id) {
+    var idx = -1;
+    for (var i = 0; i < keys.items.length; i++) { if (keys.items[i].id === id) { idx = i; break; } }
+    if (idx < 0) { return; }
+    var removed = keys.items[idx];
+    keys.items.splice(idx, 1);
+    delete revealedKeys[id];
+    saveKeys();
+    refreshKeyList();
+    toast('키를 삭제했어요', '실행취소', function () {
+      keys.items.splice(Math.min(idx, keys.items.length), 0, removed);
+      saveKeys();
+      refreshKeyList();
+      toast('키를 되살렸어요');
+    });
+  }
+
   /* ── import / export ─────────────────────── */
   function exportJSON() {
     var payload = {
       app: 'studio-memo',
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
-      folders: state.folders
+      folders: state.folders,
+      apiKeys: keys.items
     };
     var text = JSON.stringify(payload, null, 2);
     var d = new Date();
@@ -1066,12 +1340,16 @@
       if (!parsed) { toast('JSON 파일을 읽지 못했어요'); return; }
       var folders = normalizeFolderList(parsed.folders || (Array.isArray(parsed) ? parsed : null));
       if (!folders) { toast('메모 파일 형식이 아니에요'); return; }
-      pendingImport = folders;
-      openConfirm(
-        '가져올까요?',
-        '지금 메모 ' + totalMessages(state.folders) + '개가 가져온 메모 ' + totalMessages(folders) + '개(' + folders.length + '개 프로젝트)로 바뀌어요.',
-        '가져오기', 'import', null, false
-      );
+      var rawKeys = (!Array.isArray(parsed) && parsed && Array.isArray(parsed.apiKeys)) ? parsed.apiKeys : null;
+      var keySet = rawKeys ? sanitizeKeys({ items: rawKeys }) : null;
+      pendingImport = { folders: folders, keys: keySet };
+      var msg = '지금 메모 ' + totalMessages(state.folders) + '개가 가져온 메모 ' + totalMessages(folders) + '개(' + folders.length + '개 프로젝트)로 바뀌어요.';
+      if (keySet) {
+        msg += ' API 키 보관함도 ' + keySet.items.length + '개로 바뀌어요.';
+      } else if (keys.items.length) {
+        msg += ' 보관 중인 API 키 ' + keys.items.length + '개는 그대로 남아요.';
+      }
+      openConfirm('가져올까요?', msg, '가져오기', 'import', null, false);
     };
     reader.onerror = function () { toast('파일을 읽지 못했어요'); };
     reader.readAsText(file);
@@ -1130,8 +1408,7 @@
       renderChat({ toEnd: false });
     });
 
-    el.exportBtn.addEventListener('click', exportJSON);
-    el.importBtn.addEventListener('click', function () { el.importFile.click(); });
+    el.settingsBtn.addEventListener('click', openSettings);
     el.importFile.addEventListener('change', onImportFile);
 
     el.overlay.addEventListener('click', function (e) {
@@ -1160,13 +1437,13 @@
     el.chat = $('chat');
     el.input = $('input');
     el.sendBtn = $('sendBtn');
-    el.exportBtn = $('exportBtn');
-    el.importBtn = $('importBtn');
+    el.settingsBtn = $('settingsBtn');
     el.importFile = $('importFile');
     el.overlay = $('overlay');
     el.toast = $('toast');
 
     load();
+    loadKeys();
     bind();
     renderAll({ toEnd: true });
     el.chat.scrollTop = el.chat.scrollHeight;

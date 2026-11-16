@@ -3,8 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#faf9f6">
+<meta name="theme-color" content="#F7F6F3">
 <meta name="color-scheme" content="light">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <title>스튜디오 메모</title>
 <style>
   :root{
@@ -1167,6 +1170,17 @@
   } else {
     init();
   }
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function (err) {
+      if (window.console && console.warn) console.warn('서비스 워커 등록 실패', err);
+    });
+  });
 })();
 </script>
 </body>

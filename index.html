@@ -718,7 +718,7 @@
       el.chat.innerHTML = '<div class="chat-inner is-empty"><div class="empty">' +
         (hasAny
           ? '<p class="empty-t">조건에 맞는 메모가 없어요</p><p class="empty-s">검색어나 필터를 바꿔보세요.</p>'
-          : '<p class="empty-t">아직 메모가 없어요</p><p class="empty-s">아래에 첫 메모를 남겨보세요.<br>메모를 꾹 누르면 완료·중요·줄긋기·삭제 메뉴가 열려요.</p>') +
+          : '<p class="empty-t">아직 메모가 없어요</p><p class="empty-s">아래에 첫 메모를 남겨보세요.<br>메모를 꾹 누르면 복사·완료·중요·줄긋기·삭제 메뉴가 열려요.</p>') +
         '</div></div>';
       return;
     }
@@ -901,8 +901,11 @@
     } else {
       preview = '사진 ' + ((m.images && m.images.length) || 0) + '장';
     }
+    // 텍스트가 있는 메모에만 복사 항목을 보여 준다 (사진 전용 메모는 숨김)
+    var canCopy = !!(m.text && m.text.replace(/\s+/g, '') !== '');
     openSheet(
       '<div class="sheet-preview">' + esc(preview) + '</div>' +
+      (canCopy ? '<button class="sheet-item" data-act="msg/copy"><span>복사</span></button>' : '') +
       '<button class="sheet-item" data-act="msg/done"><span>완료했다</span>' + (m.done ? '<span class="mark">✓</span>' : '') + '</button>' +
       '<button class="sheet-item" data-act="msg/important"><span>중요표시</span>' + (m.important ? '<span class="mark">★</span>' : '') + '</button>' +
       '<button class="sheet-item" data-act="msg/strike"><span>글자에 줄긋기</span>' + (m.struck ? '<span class="mark">✓</span>' : '') + '</button>' +
@@ -1042,6 +1045,14 @@
     if (act.indexOf('msg/') === 0) {
       var id = (sheetCtx && sheetCtx.kind === 'message') ? sheetCtx.id : actionId;
       if (!id) { closeOverlay(); return; }
+      if (act === 'msg/copy') {
+        var src = findMessage(id);
+        var body = (src.msg && typeof src.msg.text === 'string') ? src.msg.text : '';
+        closeOverlay();
+        if (body.replace(/\s+/g, '') === '') { toast('복사할 텍스트가 없어요'); return; }
+        copyText(body, '복사했어요');
+        return;
+      }
       if (act === 'msg/done') {
         closeOverlay();
         var done = toggleMessageFlag(id, 'done');

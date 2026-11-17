@@ -6,7 +6,7 @@
  */
 'use strict';
 
-var CACHE_NAME = 'studio-memo-v2';
+var CACHE_NAME = 'studio-memo-v3';
 var APP_SHELL = [
   './',
   './index.html',
